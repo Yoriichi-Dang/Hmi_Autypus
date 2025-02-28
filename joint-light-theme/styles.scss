@@ -1,0 +1,30 @@
+// Import variables and mixins first (at the very top)
+@use "variables";
+@use "mixins" as *;
+@use "color-palette";
+@use "context-toolbar";
+
+// Import components
+@use "free-transform";
+@use "halo";
+@use "inspector";
+@use "lightbox";
+@use "navigator";
+@use "popup.scss";
+@use "select-box";
+@use "select-button-group";
+@use "selection";
+@use "snaplines";
+@use "stencil";
+@use "toolbar";
+@use "tooltip";
+@use "widgets";
+
+// Theme specific font (now below @use statements)
+@font-face {
+  font-family: "Open Sans";
+  font-stretch: 75% 125%;
+  font-style: normal;
+  font-weight: 125 950;
+  src: url(/assets/fonts/OpenSans.ttf);
+}

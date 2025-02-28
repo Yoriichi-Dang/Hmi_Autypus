@@ -1,0 +1,41 @@
+@use "mixins" as *;
+
+// CSS Variables
+:root {
+  --jj-border-radius-small: 4px;
+  --jj-border-radius-medium: 6px;
+  --jj-border-radius-large: 12px;
+
+  // Background
+  --jj-bg-tooltip: #374151;
+  --jj-bg-navigator-path-fill: #8da9d3;
+  --jj-bg-primary: #ffffff;
+  --jj-bg-secondary: #4b5563;
+  --jj-bg-tertiary: #d1d5db;
+  --jj-bg-quaternary: #edf1f8;
+
+  // Border
+  --jj-border-navigator: #4d6490;
+  --jj-border-selector: #137bdd;
+  --jj-border-primary: #9ca3af;
+  --jj-border-secondary: #d1d5db;
+  --jj-border-tertiary: #e0e6ea;
+  --jj-border-quaternary: #374151;
+
+  // Text
+  --jj-text-context-toolbar: #1f2937;
+  --jj-text-primary: #4b5563;
+  --jj-text-secondary: #6b7280;
+  --jj-text-tertiary: #9ca3af;
+  --jj-text-disabled: #d1d5db;
+
+  // Accent
+  --jj-accent-primary: #e2e9f4;
+  --jj-accent-secondary: #d9e2f2;
+  --jj-accent-tertiary: #d2dde5;
+  --jj-accent-hover: #edf1f8;
+}
+
+// SCSS Variables
+
+$context-animation: fadeIn 0.2s ease-in-out;

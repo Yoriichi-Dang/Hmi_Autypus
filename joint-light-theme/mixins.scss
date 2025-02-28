@@ -1,0 +1,48 @@
+// Keyframes
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scaleY(0);
+    }
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+// SCSS Mixins
+$group-transition-duration: 0.3s;
+
+@mixin group-open {
+    max-height: 1000px;
+    transition: max-height $group-transition-duration ease-in;
+}
+
+@mixin group-closed {
+    max-height: 32px;
+    transition: max-height $group-transition-duration ease-out;
+}
+
+@mixin group-icon {
+    width: 10px !important;
+    height: 16px !important;
+    transition: transform $group-transition-duration ease;
+}
+
+@mixin group-icon-closed {
+    transform: rotate(-90deg);
+    filter: invert(0.5);
+}
+
+@mixin dropdown-icon(
+    $path: '/assets/inspector/icon-arrow-down.svg',
+    $icon-width: 10px,
+    $icon-height: 6px
+) {
+    width: $icon-width;
+    height: $icon-height;
+    background-image: url($path);
+    background-size: $icon-width $icon-height;;
+}
+
