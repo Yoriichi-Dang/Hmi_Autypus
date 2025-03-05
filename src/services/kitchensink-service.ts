@@ -6,6 +6,7 @@ import { HaloService } from "./halo-service";
 import { KeyboardService } from "./keyboard-service";
 import * as appShapes from "../shapes/app-shapes";
 import { NavigatorService, ZOOM_SETTINGS } from "./navigator-service";
+import { drawLine, drawLink } from "../utils/utils";
 
 type Services = {
   stencilService: StencilService;
@@ -15,7 +16,10 @@ type Services = {
   keyboardService: KeyboardService;
   navigatorService: NavigatorService;
 };
-
+export type Point = {
+  x: number;
+  y: number;
+};
 class KitchenSinkService {
   el: HTMLElement;
 
@@ -274,15 +278,31 @@ class KitchenSinkService {
 
     // Initiate selecting when the user grabs the blank area of the paper while the Shift key is pressed.
     // Otherwise, initiate paper pan.
+    let startPoint: Point = null;
+    let endPoint: Point = null;
+
     this.paper.on(
       "blank:pointerdown",
       (evt: joint.dia.Event, _x: number, _y: number) => {
         if (keyboard.isActive("shift", evt)) {
           this.selection.startSelecting(evt);
+        } else if (evt.altKey || evt.metaKey) {
+          this.paper.el.style.cursor = "pointer";
+          startPoint = { x: _x, y: _y };
         } else {
           this.selection.collection.reset([]);
           this.paperScroller.startPanning(evt);
           this.paper.removeTools();
+        }
+      }
+    );
+    this.paper.on(
+      "blank:pointerup",
+      (evt: joint.dia.Event, _x: number, _y: number) => {
+        if (evt.altKey || evt.metaKey) {
+          endPoint = { x: _x, y: _y };
+          this.paper.el.style.cursor = "grab";
+          drawLine(this.graph, startPoint, endPoint);
         }
       }
     );

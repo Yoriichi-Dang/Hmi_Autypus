@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import jointjsLogo from "/assets/icons/joint-js.svg";
+import socOneIcon from "/assets/images/socone_1.png";
 
 import { StencilService } from "./services/stencil-service";
 import { ToolbarService } from "./services/toolbar-service";
@@ -52,7 +52,7 @@ function Rappid() {
 
     rappid.current.startRappid();
 
-    rappid.current.graph.fromJSON(JSON.parse(sampleGraphs.emergencyProcedure), {
+    rappid.current.graph.fromJSON(JSON.parse(sampleGraphs.initPaper), {
       ignoreUndoRedo: true,
     });
   }, []);
@@ -60,7 +60,14 @@ function Rappid() {
   return (
     <div id="app" className="joint-app">
       <div className="app-header">
-        <img src={jointjsLogo} alt="JointJS" />
+        <img
+          src={socOneIcon}
+          style={{
+            height: "60px",
+            width: "60px",
+          }}
+          alt="JointJS"
+        />
       </div>
       <div ref={toolbarContainer} className="toolbar-container"></div>
       <div className="app-body">
