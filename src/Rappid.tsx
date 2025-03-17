@@ -51,10 +51,6 @@ function Rappid() {
     );
 
     rappid.current.startRappid();
-
-    rappid.current.graph.fromJSON(JSON.parse(sampleGraphs.initPaper), {
-      ignoreUndoRedo: true,
-    });
   }, []);
 
   return (

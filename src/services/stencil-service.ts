@@ -1,13 +1,12 @@
 import { ui, dia, util } from "@joint/plus";
 import { stencilGroups, stencilShapes } from "../config/stencil";
 import * as appShapes from "../shapes/app-shapes";
-
+import * as speedometerComponent from "../shapes/speedometer";
 const HIGHLIGHT_COLOR = "#F4F7FB";
 
 // Define a custom highlighter for the stencil hover effect
 const StencilBackground = dia.HighlighterView.extend({
   tagName: "rect",
-
   attributes: {
     stroke: "none",
     fill: "transparent",
@@ -60,6 +59,11 @@ export class StencilService {
   constructor(private readonly stencilContainer: HTMLElement) {}
 
   create(paperScroller: ui.PaperScroller, snaplines: ui.Snaplines) {
+    // Create a new object that combines appShapes and speedometer components
+    const namespace = {
+      ...appShapes,
+      ...speedometerComponent,
+    };
     this.stencil = new ui.Stencil({
       paper: paperScroller,
       snaplines: snaplines,
@@ -73,10 +77,10 @@ export class StencilService {
           model: new dia.Graph(
             {},
             {
-              cellNamespace: appShapes,
+              cellNamespace: namespace,
             }
           ),
-          cellViewNamespace: appShapes,
+          cellViewNamespace: namespace,
         };
       },
       search: {
@@ -113,10 +117,10 @@ export class StencilService {
     });
 
     // We create a single tooltip paper that will be reused for all tooltips
-    this.tooltipGraph = new dia.Graph({}, { cellNamespace: appShapes });
+    this.tooltipGraph = new dia.Graph({}, { cellNamespace: namespace });
     this.tooltipPaper = new dia.Paper({
       model: this.tooltipGraph,
-      cellViewNamespace: appShapes,
+      cellViewNamespace: namespace,
       width: 140,
       height: 120,
       async: true,

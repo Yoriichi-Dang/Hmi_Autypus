@@ -1,5 +1,8 @@
+import { speedometer } from "../shapes/speedometer";
+
 export const stencilGroups = {
   basic: { index: 1, label: "Basic shapes" },
+  speedometer: { index: 2, label: "Speedometer" },
   advanced: { index: 2, label: "Advanced shapes" },
 };
 const PRIMARY_SHAPE_COLOR = "#353535";
@@ -46,7 +49,7 @@ export const stencilShapes = {
           strokeWidth: 0,
         },
         targetAttributes: {
-          size: { width: 60, height: 60 },
+          size: { width: 200, height: 200 },
         },
       },
     },
@@ -714,6 +717,40 @@ export const stencilShapes = {
           fontSize: 11,
           stroke: PRIMARY_SHAPE_COLOR,
           strokeWidth: 0,
+        },
+      },
+      targetAttributes: {
+        size: { width: 60, height: 40 },
+      },
+    },
+  ],
+  speedometer: [
+    {
+      type: "speedometer.SpeedometerArc",
+      size: { width: 100, height: 100 },
+      name: "Speedometer",
+      attrs: {
+        body: {
+          fill: "#ffffff",
+          stroke: "#353535",
+          strokeWidth: 1,
+          strokeDasharray: "0",
+        },
+      },
+      targetAttributes: {
+        size: { width: 60, height: 40 },
+      },
+    },
+    {
+      type: "speedometer.SpeedometerArcWithoutLine",
+      size: { width: 100, height: 100 },
+      name: "Speedometer",
+      attrs: {
+        body: {
+          fill: "#ffffff",
+          stroke: "#353535",
+          strokeWidth: 1,
+          strokeDasharray: "0",
         },
       },
       targetAttributes: {
