@@ -13,8 +13,8 @@ export class ConnectionService {
   }
   initializeAddListener() {
     this.graph.on("change:attrs", (cell, attrs, options) => {
-      if (cell.get("attrs")?.label?.text?.toLowerCase() === "server") {
-        switch (cell.get("attrs")?.label?.text?.toLowerCase()) {
+      if (attrs.label && attrs.label.text !== undefined) {
+        switch (attrs.label.text.toLowerCase()) {
           case "server":
             this.connectionServer = new ConnectionServer();
             this.connectionServer
