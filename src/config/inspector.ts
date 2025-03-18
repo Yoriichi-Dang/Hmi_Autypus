@@ -11,12 +11,25 @@ const options = {
     { content: "#FFFFFF" },
     { content: "#F5242C" },
     { content: "#7E4AD3" },
-    { content: "#FB54A9" },
-    { content: "#33B6D1" },
-    { content: "#2A3A4E" },
-    { content: "#3771B8" },
-    { content: "#F27F31" },
-    { content: "#1CA25D" },
+    { content: "#6EACDA" },
+    { content: "#03346E" },
+    { content: "#021526" },
+    { content: "#433D8B" },
+    { content: "#2E236C" },
+    { content: "#17153B" },
+    { content: "#23036a" },
+    { content: "#30009c" },
+    { content: "#3700b3" },
+    { content: "#5600e8" },
+    { content: "#6101ee" },
+    { content: "#7f39fb" },
+    { content: "#02002e" },
+    { content: "#010048" },
+    { content: "#010057" },
+    { content: "#02006b" },
+    { content: "#090088" },
+    { content: "#01fff3" },
+    { content: "#01bbd1" },
   ],
 
   colorPaletteReset: [
@@ -403,6 +416,68 @@ export const inspectorDefinitions: Record<
       },
     },
   },
+  "speedometer.SpeedometerCircle": {
+    inputs: {
+      attrs: {
+        body: {
+          fill: {
+            type: "color-palette",
+            options: options.colorPalette,
+            label: "Color",
+            group: "presentation",
+            index: 1,
+          },
+          stroke: {
+            type: "color-palette",
+            options: options.colorPalette,
+            label: "Outline",
+            group: "presentation",
+            index: 2,
+          },
+          strokeWidth: {
+            type: "range",
+            min: 0,
+            max: 30,
+            step: 1,
+            unit: "px",
+            label: "Thickness",
+            group: "presentation",
+            index: 3,
+          },
+          strokeDasharray: {
+            type: "select-box",
+            options: options.strokeStyle,
+            label: "Style",
+            group: "presentation",
+            when: { ne: { "attrs/body/strokeWidth": 0 } },
+            index: 4,
+          },
+        },
+      },
+      speed: {
+        type: "range",
+        min: 0,
+        max: 100,
+        step: 1,
+        label: "Speed",
+        group: "action",
+      },
+    },
+    groups: {
+      presentation: {
+        label: "Presentation",
+        index: 1,
+      },
+      text: {
+        label: "Text",
+        index: 2,
+      },
+      action: {
+        label: "Action",
+        index: 3,
+      },
+    },
+  },
   "app.Link": {
     inputs: {
       attrs: {
@@ -684,6 +759,104 @@ export const inspectorDefinitions: Record<
               and: [
                 { ne: { "attrs/body/stroke": "transparent" } },
                 { ne: { "attrs/body/strokeWidth": 0 } },
+              ],
+            },
+            index: 4,
+          },
+        },
+      },
+    },
+    groups: {
+      presentation: {
+        label: "Presentation",
+        index: 1,
+      },
+      text: {
+        label: "Text",
+        index: 2,
+      },
+    },
+  },
+  "app.Circle": {
+    inputs: {
+      attrs: {
+        label: {
+          text: {
+            type: "content-editable",
+            label: "Text",
+            group: "text",
+            index: 1,
+          },
+          fontSize: {
+            type: "range",
+            min: 5,
+            max: 80,
+            unit: "px",
+            label: "Font size",
+            group: "text",
+            when: { ne: { "attrs/label/text": "" } },
+            index: 2,
+          },
+          fontFamily: {
+            type: "select-box",
+            options: options.fontFamily,
+            label: "Font family",
+            group: "text",
+            when: { ne: { "attrs/label/text": "" } },
+            index: 3,
+          },
+          fontWeight: {
+            type: "select-box",
+            options: options.fontWeight,
+            label: "Font thickness",
+            group: "text",
+            when: { ne: { "attrs/label/text": "" } },
+            index: 4,
+          },
+          fill: {
+            type: "color-palette",
+            options: options.colorPalette,
+            label: "Text Color",
+            group: "text",
+            when: { ne: { "attrs/label/text": "" } },
+            index: 5,
+          },
+        },
+        body: {
+          fill: {
+            type: "color-palette",
+            options: options.colorPalette,
+            label: "Fill",
+            group: "presentation",
+            index: 1,
+          },
+          stroke: {
+            type: "color-palette",
+            options: options.colorPalette,
+            label: "Outline",
+            group: "presentation",
+            index: 2,
+          },
+          strokeWidth: {
+            type: "range",
+            min: 0,
+            max: 30,
+            step: 1,
+            unit: "px",
+            label: "Outline thickness",
+            group: "presentation",
+            when: { ne: { "attrs/body/stroke": "transparent" } },
+            index: 3,
+          },
+          strokeDasharray: {
+            type: "select-box",
+            options: options.strokeStyle,
+            label: "Outline style",
+            group: "presentation",
+            when: {
+              and: [
+                { ne: { "attrs/body/stroke": "transparent" } },
+                { ne: { "attrs/body/stroke-width": 0 } },
               ],
             },
             index: 4,

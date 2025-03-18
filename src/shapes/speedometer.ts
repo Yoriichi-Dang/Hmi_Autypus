@@ -384,9 +384,113 @@ export namespace speedometer {
       return joint.util.defaultsDeep(
         {
           type: "speedometer.SpeedometerCircle",
+          size: { width: 200, height: 200 },
+          speed: 0,
+          maxSpeed: 270,
+          minSpeed: 0,
+          tickTextColor: "#350100",
+          numberPartSpeed: 10,
+          attrs: {
+            root: { magnetSelector: "body" },
+
+            body: {
+              fill: "none",
+              stroke: "black",
+              strokeWidth: 2,
+              r: "calc(0.5*w)",
+              cx: "calc(0.5*w)",
+              cy: "calc(0.5*h)",
+            },
+            // We'll add tick text elements dynamically
+          },
         },
         joint.dia.Element.prototype.defaults
       );
+    }
+
+    preinitialize(
+      attributes?: joint.dia.Element.Attributes,
+      options?: any
+    ): void {
+      // Create dynamic markup with placeholders for tick texts
+      const maxTicks = 10; // Support up to 30 ticks (can be adjusted)
+      let tickTextMarkup = "";
+
+      for (let i = 0; i < maxTicks; i++) {
+        tickTextMarkup += `<text @selector="tick${i}"/>`;
+      }
+
+      this.markup = joint.util.svg/* xml */ `
+        <g>
+          <circle @selector="body"/>
+          <circle @selector="inner"/>
+          ${tickTextMarkup}
+        </g>
+      `;
+    }
+
+    initialize(...args: any[]): void {
+      super.initialize(...args);
+      this.on("change:size", this.onResize, this);
+      this.on("change:tickTextColor", this.updateTickTexts, this);
+      this.updateTickTexts();
+    }
+
+    updateTickTexts(): void {
+      const minSpeed = this.get("minSpeed");
+      const maxSpeed = this.get("maxSpeed");
+      const numberPartSpeed = this.get("numberPartSpeed");
+      const minAngle = 135;
+      const maxAngle = 405;
+      const numTicks = numberPartSpeed;
+      const angleStep = (maxAngle - minAngle) / (numTicks - 1);
+      const tickTextColor = this.get("tickTextColor");
+      const width = this.get("size").width;
+      const height = this.get("size").height;
+      const r = Math.min(width, height) / 2;
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      // Update attributes for each tick text
+      const attrs: any = {};
+
+      for (let i = 0; i < numTicks; i++) {
+        const speed = minSpeed + (i * maxSpeed) / (numTicks - 1);
+        const angle = minAngle + i * angleStep;
+        const radians = degreeToRadian(angle);
+
+        // Calculate position
+        const textX = centerX + r * 0.98 * Math.cos(radians);
+        const textY = centerY + r * 0.98 * Math.sin(radians);
+        const rotationAngle = angle + 90;
+        // Set attributes for this text element
+        attrs[`tick${i}`] = {
+          text: speed.toString(),
+          x: textX,
+          y: textY,
+          textAnchor: angle <= 180 ? "start" : "end",
+          transform: `rotate(${rotationAngle}, ${textX}, ${textY})`,
+          fontSize: width * 0.05,
+          fontFamily: "Arial",
+          fill: tickTextColor, // Use the configurable color
+          display: "block", // Make visible
+        };
+      }
+      this.attr(attrs);
+    }
+
+    onResize(
+      element: joint.dia.Element,
+      newSize: { width: number; height: number },
+      opt: any
+    ): void {
+      if (opt && opt.syncResize) return;
+
+      const size = Math.max(newSize.width, newSize.height);
+      this.resize(size, size, { syncResize: true });
+
+      // Update text positions after resize
+      this.updateTickTexts();
     }
   }
 

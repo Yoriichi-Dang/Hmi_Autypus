@@ -1,6 +1,36 @@
 import * as joint from "@joint/plus";
 const cache = new Map();
 export namespace app {
+  export class Circle extends joint.shapes.standard.Circle {
+    defaults() {
+      return joint.util.defaultsDeep(
+        {
+          type: "app.Circle",
+          size: { width: 100, height: 100 },
+          attrs: {
+            body: {
+              fill: "#ffffff",
+              stroke: "#353535",
+              strokeWidth: 1,
+            },
+            r: 10,
+          },
+        },
+        joint.shapes.standard.Circle.prototype.defaults
+      );
+    }
+    initialize(
+      attributes?: joint.shapes.standard.CircleAttributes,
+      options?: any
+    ): void {
+      super.initialize(attributes, options);
+      this.on("change:size", (_, newSize) => {
+        console.log(this.get("r"));
+        const r = Math.max(newSize.width, newSize.height);
+        this.resize(r, r, { syncResize: true });
+      });
+    }
+  }
   export class Link extends joint.shapes.standard.Link {
     defaultLabel = {
       attrs: {

@@ -1,9 +1,7 @@
-import { speedometer } from "../shapes/speedometer";
-
 export const stencilGroups = {
-  basic: { index: 1, label: "Basic shapes" },
+  basic: { index: 1, label: "Basic shapes", closed: true },
   speedometer: { index: 2, label: "Speedometer" },
-  advanced: { index: 2, label: "Advanced shapes" },
+  advanced: { index: 2, label: "Advanced shapes", closed: true },
 };
 const PRIMARY_SHAPE_COLOR = "#353535";
 const PRIMARY_SHAPE_FILL = "#ffffff";
@@ -78,7 +76,7 @@ export const stencilShapes = {
       },
     },
     {
-      type: "standard.Ellipse",
+      type: "app.Circle",
       name: "Circle",
       attrs: {
         body: {
@@ -753,6 +751,14 @@ export const stencilShapes = {
           strokeDasharray: "0",
         },
       },
+      targetAttributes: {
+        size: { width: 60, height: 40 },
+      },
+    },
+    {
+      type: "speedometer.SpeedometerCircle",
+      size: { width: 100, height: 100 },
+      name: "Speedometer",
       targetAttributes: {
         size: { width: 60, height: 40 },
       },
