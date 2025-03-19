@@ -5,10 +5,10 @@ import { InspectorService } from "./inspector-service";
 import { HaloService } from "./halo-service";
 import { KeyboardService } from "./keyboard-service";
 import * as appShapes from "../shapes/app-shapes";
-import { NavigatorService, ZOOM_SETTINGS } from "./navigator-service";
-import { drawLine } from "../utils/utils";
 import * as speedometerComponent from "../shapes/speedometer";
+import { NavigatorService, ZOOM_SETTINGS } from "./navigator-service";
 import { ConnectionService } from "./connection-service";
+import { drawLine } from "../utils/utils";
 
 type Services = {
   stencilService: StencilService;
@@ -91,7 +91,6 @@ class KitchenSinkService {
     this.initializeKeyboardShortcuts();
     this.initializeTooltips();
     this.initializeConnectionService();
-    this.paper.render();
   }
   initializeConnectionService() {
     this.connectionService = new ConnectionService(this.paper, this.graph);
@@ -111,6 +110,7 @@ class KitchenSinkService {
         cellNamespace: namespace,
       }
     ));
+
     this.commandManager = new joint.dia.CommandManager({
       graph: graph,
       cmdBeforeAdd: (
@@ -140,7 +140,6 @@ class KitchenSinkService {
       drawGrid: true,
       model: graph,
       cellViewNamespace: namespace,
-
       defaultLink: <joint.dia.Link>new appShapes.app.Link(),
       defaultConnectionPoint: appShapes.app.Link.connectionPoint,
       routerNamespace: {
@@ -295,7 +294,6 @@ class KitchenSinkService {
     // Otherwise, initiate paper pan.
     let startPoint: Point = null;
     let endPoint: Point = null;
-
     this.paper.on(
       "blank:pointerdown",
       (evt: joint.dia.Event, _x: number, _y: number) => {
