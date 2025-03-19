@@ -1,0 +1,147 @@
+classDiagram
+    class joint{
+        <<namespace>>
+    }
+    class dia {
+        <<namespace>>
+    }
+    class Graph {
+        <<class>>
+    }
+    class Paper {
+        <<class>>
+        <<namespace>>
+    }
+    class Cell {
+        <<namespace>>
+        <<class>>
+    }
+    class Element {
+        <<namespace>>
+        <<class>>
+    }
+    class Link {
+        <<namespace>>
+        <<class>>
+    }
+  
+    class CellView {
+        <<class>>
+    }
+    class ElementView {
+        <<class>>
+    }
+    class LinkView {
+        <<class>>
+    }
+    class mvc{
+        <<namespace>>
+    }
+    class Model {
+        <<class>>
+    }
+    class ModelBase{
+        <<class>>
+    }
+    class View {
+        <<class>>
+        ViewOptions
+    }
+    class ViewBase {
+        <<class>>
+    }
+    class Collection {
+        <<class>>
+    }
+    joint --> dia
+    dia --> Graph
+    dia --> Paper
+    dia --> mvc
+    mvc --> ModelBase
+    mvc --> ViewBase
+    mvc --> Collection
+    Model --> Cell
+    Element <-- Cell
+    Link <-- Cell
+    ElementView <-- CellView
+    LinkView <-- CellView
+    View --> CellView
+    ViewBase --> View
+    ModelBase --> Model
+
+    class Group {
+        <<class>>
+    }
+    class Halo {
+        <<class>>
+    }
+    class Selection {
+        <<namespace>>
+    }
+    class CommandManager{
+        <<class>>
+    }
+    class Stencil {
+        <<namespace>>
+    }
+    class Inspector{
+        <<class>>
+    }
+    class PaperScroller {
+        <<class>>
+    }
+    class PathEditor {
+        <<class>>
+    }
+    class Toolbar {
+        <<class>>
+    }
+    class Tooltip {
+        <<class>>
+    }
+    class Dialog {
+        <<class>>
+    }
+    CommandManager <-- Model
+    Dialog <-- View
+    Halo <-- View
+    Inspector <-- View
+    Group <-- Element
+    PaperScroller <-- View
+
+    class shapes{
+        <<namespace>>
+    }
+    class standard{
+        <<namespace>>
+        Rectangle
+        Ellipse
+        Circle
+        Path
+        Polygon
+        Polyline
+        Image
+        BorderedImage
+        EmbeddedImage
+        InscribedImage
+        Link
+        TextBlock
+        Cylinder
+        HeaderedRectangle
+        DoubleLink
+        ShadowLink
+    }
+    class Options{
+        <<interface>>
+    }
+    class ViewOptions{
+        <<interface>>
+    }
+    shapes --> standard
+    joint --> shapes
+    View --> Stencil
+    View --> Toolbar
+    View --> PathEditor
+    View --> Tooltip
+    Options <-- ViewOptions
+    View --|> ViewOptions

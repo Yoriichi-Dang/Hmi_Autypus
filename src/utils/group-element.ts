@@ -53,3 +53,4 @@ function toggleSelection(
     groupElements(elements, graph, selection);
   }
 }
+export { toggleSelection };

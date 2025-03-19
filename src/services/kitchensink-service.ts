@@ -9,7 +9,7 @@ import * as speedometerComponent from "../shapes/speedometer";
 import { NavigatorService, ZOOM_SETTINGS } from "./navigator-service";
 import { ConnectionService } from "./connection-service";
 import { drawLine } from "../utils/utils";
-
+import { toggleSelection } from "../utils/group-element";
 type Services = {
   stencilService: StencilService;
   toolbarService: ToolbarService;
@@ -349,7 +349,13 @@ class KitchenSinkService {
         );
       }
     });
-
+    this.paper.on("element:pointerclick", (elementView) => {
+      const element = elementView.model;
+      const [group = element] = element.getAncestors().reverse();
+      console.log("group", group);
+      console.log("element", element);
+      this.selection.collection.reset([group]);
+    });
     this.selection.on(
       "selection-box:pointerdown",
       (elementView: joint.dia.ElementView, evt: joint.dia.Event) => {
@@ -469,6 +475,10 @@ class KitchenSinkService {
   onSelectionChange() {
     const { paper, selection } = this;
     const { collection } = selection;
+    const elements = selection.collection.toArray();
+    selection.removeHandle("group");
+    if (elements.length === 0) return;
+    const [element] = elements;
     paper.removeTools();
     joint.ui.Halo.clear(paper);
     joint.ui.FreeTransform.clear(paper);
@@ -478,9 +488,31 @@ class KitchenSinkService {
       const primaryCellView = paper.findViewByModel(primaryCell);
       selection.destroySelectionBox(primaryCell);
       this.selectPrimaryCell(primaryCellView);
-    } else if (collection.length === 2) {
-      collection.each(function (cell: joint.dia.Cell) {
-        selection.createSelectionBox(cell);
+    } else if (collection.length > 1) {
+      selection.addHandle({
+        name: "group",
+        position: joint.ui.Selection.HandlePosition.NW,
+        icon: "https://assets.codepen.io/7589991/group.svg",
+        attrs: {
+          ".handle": { title: `Group ${collection.length} Elements.` },
+        },
+        events: {
+          pointerdown: () => toggleSelection(this.selection, this.graph),
+        },
+      });
+    } else if (element.getEmbeddedCells().length > 0) {
+      selection.addHandle({
+        name: "group",
+        position: joint.ui.Selection.HandlePosition.NW,
+        icon: "https://assets.codepen.io/7589991/ungroup.svg",
+        attrs: {
+          ".handle": {
+            title: `Ungroup ${element.getEmbeddedCells().length} Elements.`,
+          },
+        },
+        events: {
+          pointerdown: () => toggleSelection(this.selection, this.graph),
+        },
       });
     }
   }
