@@ -134,7 +134,6 @@ export default class StencilService {
   startHoverListener() {
     this.stencil.on({
       "group:element:mouseenter": (_, elementView) => {
-        console.log("group:element:mouseenter");
         StencilBackground.add(elementView, "root", "stencil-highlight", {
           padding: 4,
           width: 36,
@@ -143,13 +142,10 @@ export default class StencilService {
         });
       },
       "group:element:mouseleave": (groupPaper) => {
-        console.log("group:element:mouseleave");
         StencilBackground.removeAll(groupPaper);
       },
       // Remove all highlights when the user starts dragging an element
       "group:element:pointerdown": (groupPaper) => {
-        console.log("group:element:pointerdown");
-
         StencilBackground.removeAll(groupPaper);
       },
     });

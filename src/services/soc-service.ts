@@ -1,9 +1,13 @@
+import ElementEvent from "../events/element-event";
+import { LinkEvent } from "../events/link-event";
 import { HaloService } from "./halo-service";
 import { InspectorService } from "./inspector-service";
 import { KeyboardService } from "./keyboard-service";
 import { NavigatorService } from "./navigator-service";
 import StencilService from "./stencil-service";
+import * as appShapes from "../shapes/app-shapes";
 import * as joint from "@joint/plus";
+import GraphEvent from "../events/graph-event";
 type Service = {
   stencilService: StencilService;
   inspectorService: InspectorService;
@@ -11,24 +15,37 @@ type Service = {
   haloService: HaloService;
   keyboardService: KeyboardService;
 };
+export const defaultPaperSize: { width: number; height: number } = {
+  width: 1400,
+  height: 1200,
+};
+export const pageBreakSettings: {
+  color: string;
+  width: number;
+  height: number;
+} = {
+  color: "#353535",
+  width: 1000,
+  height: 1000,
+};
 export default class SocService {
   graph: joint.dia.Graph;
   paper: joint.dia.Paper;
   snaplines: joint.ui.Snaplines;
   paperScroller: joint.ui.PaperScroller;
-  defaultPaperSize: { width: number; height: number } = {
-    width: 1400,
-    height: 1200,
-  };
+  commandManager: joint.dia.CommandManager;
+  clipboard: joint.ui.Clipboard;
+  selection: joint.ui.Selection;
+  //service
+  inspectorService: InspectorService;
   stencilService: StencilService;
   navigatorService: NavigatorService;
   haloService: HaloService;
   keyboardService: KeyboardService;
-  clipboard: joint.ui.Clipboard;
-  selection: joint.ui.Selection;
-  inspectorService: InspectorService;
-
-  commandManager: joint.dia.CommandManager;
+  //event
+  linkEvent: LinkEvent;
+  elementEvent: ElementEvent;
+  graphEvent: GraphEvent;
 
   constructor(
     private readonly paperContainer: HTMLDivElement,
@@ -53,6 +70,22 @@ export default class SocService {
     this.initSelection();
     this.initNavigator();
     this.initKeyBoardShortcuts();
+    this.startEvent();
+  }
+  startEvent() {
+    this.linkEvent = new LinkEvent(this.paper, this.graph);
+    this.linkEvent.createEventLink();
+    this.elementEvent = new ElementEvent(this.paper, this.selection);
+    this.elementEvent.createElementEvent();
+    this.graphEvent = new GraphEvent(
+      this.graph,
+      this.paper,
+      this.snaplines,
+      this.paperScroller,
+      this.paperContainer,
+      this.selection
+    );
+    this.graphEvent.createGraphEvent();
   }
   initPaper() {
     const graph = (this.graph = new joint.dia.Graph(
@@ -84,11 +117,26 @@ export default class SocService {
     });
 
     const paper = (this.paper = new joint.dia.Paper({
-      width: this.defaultPaperSize.width,
-      height: this.defaultPaperSize.height,
+      width: defaultPaperSize.width,
+      height: defaultPaperSize.height,
       gridSize: 10,
       drawGrid: true,
       model: graph,
+      defaultLink: <joint.dia.Link>new appShapes.app.Link(),
+      defaultConnectionPoint: appShapes.app.Link.connectionPoint,
+      routerNamespace: {
+        normal: joint.routers.normal,
+        orthogonal: joint.routers.orthogonal,
+        // Redefine the rightAngle router to use vertices.
+        rightAngle: function (
+          vertices: joint.g.Point[],
+          opt: Record<string, any>,
+          linkView: joint.dia.LinkView
+        ) {
+          opt.useVertices = true;
+          return joint.routers.rightAngle.call(this, vertices, opt, linkView);
+        },
+      },
       cellViewNamespace: joint.shapes,
     }));
     this.snaplines = new joint.ui.Snaplines({ paper: paper });
@@ -112,6 +160,7 @@ export default class SocService {
         this.selection.collection.reset([elementView.model]),
     });
   }
+
   initNavigator() {
     this.navigatorService.create(this.paperScroller);
   }
@@ -137,14 +186,24 @@ export default class SocService {
         rotate: true,
       }),
     });
-    const keyboard = this.keyboardService.keyboard;
-    console.log(keyboard);
-    this.paper.on(
-      "element:pointerdown",
-      (cellView: joint.dia.CellView, evt: joint.dia.Event) => {
-        console.log(cellView);
+    //link and element pointer up selection
+    this.paper.on("cell:pointerup", (cellView: joint.dia.CellView) => {
+      const cell = cellView.model;
+      const { collection } = this.selection;
+      if (collection.includes(cell)) {
+        return;
       }
-    );
+      collection.reset([cell]);
+    });
+    this.selection.collection.on("reset add remove", () => {
+      this.onSelectionChange();
+      console.log("Selection changed");
+    });
+
+    const keyboard = this.keyboardService.keyboard;
+
+    // Initiate selecting when the user grabs the blank area of the paper while the Shift key is pressed.
+    // Otherwise, initiate paper pan.
     this.paper.on(
       "blank:pointerdown",
       (evt: joint.dia.Event, _x: number, _y: number) => {
@@ -156,10 +215,6 @@ export default class SocService {
           this.paper.removeTools();
         }
       }
-    );
-
-    this.selection.collection.on("reset add remove", () =>
-      this.onSelectionChange()
     );
   }
   onSelectionChange() {
@@ -186,7 +241,7 @@ export default class SocService {
     if (cell.isElement()) {
       this.selectPrimaryElement(<joint.dia.ElementView>cellView);
     } else {
-      //   this.selectPrimaryLink(<joint.dia.LinkView>cellView);
+      this.selectPrimaryLink(<joint.dia.LinkView>cellView);
     }
 
     this.inspectorService.create(cell);
@@ -204,6 +259,31 @@ export default class SocService {
     }).render();
 
     this.haloService.create(elementView);
+  }
+  selectPrimaryLink(linkView: joint.dia.LinkView) {
+    console.log(linkView);
+    const ns = joint.linkTools;
+    const tools = [
+      new ns.Vertices(),
+      new ns.SourceAnchor(),
+      new ns.TargetAnchor(),
+      new ns.SourceArrowhead(),
+      new ns.TargetArrowhead(),
+      new ns.Boundary({ padding: 15 }),
+      new ns.Remove({ offset: -20, distance: 40 }),
+    ];
+
+    const { name } = linkView.model.router();
+
+    // Add segments tool for 'normal' router
+    if (name === "normal") tools.push(new ns.Segments());
+
+    const toolsView = new joint.dia.ToolsView({
+      name: "link-pointerdown",
+      tools,
+    });
+
+    linkView.addTools(toolsView);
   }
 
   initKeyBoardShortcuts() {

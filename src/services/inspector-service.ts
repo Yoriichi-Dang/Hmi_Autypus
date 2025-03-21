@@ -10,7 +10,7 @@ type InspectorElements = {
   content: HTMLElement;
 };
 export class InspectorService {
-  inspector: joint.ui.Inspector;
+  private inspector: joint.ui.Inspector;
   private readonly header: HTMLDivElement;
   private readonly content: HTMLElement;
   private readonly container: HTMLElement;
