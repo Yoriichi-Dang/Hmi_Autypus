@@ -2,18 +2,21 @@ import * as joint from "@joint/plus";
 const groupTemplate = new joint.shapes.standard.Rectangle({
   attrs: {
     root: {
-      pointerEvents: "none",
+      pointerEvents: "cursor",
     },
     body: {
       // For the purpose of the demo it has a color (it should be `none` in fact)
-      stroke: "#FF4468",
+      stroke: "#f8ce01",
       strokeDasharray: "5,5",
       strokeWidth: 2,
-      fill: "#FF4468",
+      fill: "#f8f8b1",
       fillOpacity: 0.2,
     },
   },
 });
+function isElementInGroup(selection: joint.ui.Selection) {
+  return selection.collection.models[0].collection.length > 1;
+}
 function groupElements(
   elements: joint.dia.Element[],
   graph: joint.dia.Graph,
@@ -53,4 +56,4 @@ function toggleSelection(
     groupElements(elements, graph, selection);
   }
 }
-export { toggleSelection };
+export { toggleSelection, isElementInGroup };

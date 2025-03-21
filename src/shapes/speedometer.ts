@@ -12,7 +12,7 @@ export namespace speedometer {
           type: "speedometer.SpeedometerArc",
           size: { width: 200, height: 200 },
           speed: 0,
-          maxSpeed: 200,
+          maxSpeed: 270,
           minAngle: 135,
           maxAngle: 405,
           currentAngle: 135,
@@ -29,21 +29,40 @@ export namespace speedometer {
             },
             lineSpeed: {
               d: "M calc(w/2) calc(w/2) L 10 calc(w/2)",
-              stroke: "black",
               strokeWidth: 2,
               strokeLinecap: "round",
             },
             body: {
               strokeWidth: 2,
               stroke: "black",
-              fill: "none",
             },
           },
         },
         joint.dia.Element.prototype.defaults
       );
     }
+    onAttrsChange(element: SpeedometerArc, attrs: any) {
+      const strokeColor = this.attr("body/stroke");
 
+      // Nếu body/fill thay đổi và không phải "none"
+      if (strokeColor && strokeColor !== "none") {
+        // Cập nhật màu cho lineSpeed
+        if (typeof strokeColor === "string") {
+          // Nếu fill là một màu đơn giản
+          this.attr("lineSpeed/stroke", strokeColor);
+        } else if (strokeColor.stops) {
+          // Nếu fill đã là gradient, giữ nguyên cấu trúc gradient nhưng thay đổi màu cuối
+          const newGradient = {
+            type: "linearGradient",
+            stops: [
+              { offset: "0%", color: strokeColor },
+              { offset: "100%", color: strokeColor },
+            ],
+          };
+          this.attr("lineSpeed/stroke", newGradient);
+        }
+      }
+    }
     preinitialize(): void {
       this.markup = joint.util.svg/* xml */ `
         <path @selector="body"/>
@@ -58,9 +77,11 @@ export namespace speedometer {
       super.initialize(...args);
       this.updateArcPath();
       this.on("change:size", this.onResize, this);
+      this.on("change:attrs", this.onAttrsChange, this);
       this.on("change:currentAngle", this.updateNeedle, this);
       this.on("change:speed", this.onSpeedChange, this);
     }
+
     onSpeedChange() {
       const speed = this.get("speed");
       const minAngle = this.get("minAngle");
@@ -140,7 +161,6 @@ export namespace speedometer {
       this.attr("body/d", arcPath);
       this.attr("body/strokeWidth", 2);
       this.attr("body/stroke", "black");
-      this.attr("body/fill", "none");
 
       this.updateNeedle();
     }
@@ -207,7 +227,7 @@ export namespace speedometer {
           type: "speedometer.SpeedometerArcWithoutLine",
           size: { width: 200, height: 200 },
           speed: 0,
-          maxSpeed: 200,
+          maxSpeed: 270,
           minAngle: 135,
           maxAngle: 405,
           currentAngle: 135,

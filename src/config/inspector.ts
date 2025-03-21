@@ -1,4 +1,8 @@
 const BORDER_COLOR = "#374151";
+const strokeWidthMax = 100;
+const maxRoundedCorners = 100;
+const maxSpeed = 270;
+
 const options = {
   colorPalette: [
     { content: "transparent", icon: "assets/transparent-icon.svg" },
@@ -295,6 +299,24 @@ export const inspectorDefinitions: Record<
             index: 3,
           },
         },
+        speedValue: {
+          fill: {
+            type: "color-palette",
+            options: options.colorPalette,
+            label: "Color value",
+            group: "presentation",
+            index: 5,
+          },
+          fontSize: {
+            type: "range",
+            min: 5,
+            max: 80,
+            unit: "px",
+            label: "Font size",
+            group: "presentation",
+            index: 6,
+          },
+        },
         body: {
           fill: {
             type: "color-palette",
@@ -313,7 +335,7 @@ export const inspectorDefinitions: Record<
           strokeWidth: {
             type: "range",
             min: 0,
-            max: 30,
+            max: strokeWidthMax,
             step: 1,
             unit: "px",
             label: "Thickness",
@@ -333,7 +355,7 @@ export const inspectorDefinitions: Record<
       speed: {
         type: "range",
         min: 0,
-        max: 100,
+        max: maxSpeed,
         step: 1,
         label: "Speed",
         group: "action",
@@ -357,6 +379,25 @@ export const inspectorDefinitions: Record<
   "speedometer.SpeedometerArc": {
     inputs: {
       attrs: {
+        lineSpeed: {
+          stroke: {
+            type: "color-palette",
+            options: options.colorPalette,
+            label: "Outline speed",
+            group: "presentation",
+            index: 5,
+          },
+          strokeWidth: {
+            type: "range",
+            min: 0,
+            max: strokeWidthMax,
+            step: 1,
+            unit: "px",
+            label: "Line Speed Thickness",
+            group: "presentation",
+            index: 6,
+          },
+        },
         body: {
           fill: {
             type: "color-palette",
@@ -375,7 +416,7 @@ export const inspectorDefinitions: Record<
           strokeWidth: {
             type: "range",
             min: 0,
-            max: 30,
+            max: strokeWidthMax,
             step: 1,
             unit: "px",
             label: "Thickness",
@@ -395,7 +436,7 @@ export const inspectorDefinitions: Record<
       speed: {
         type: "range",
         min: 0,
-        max: 100,
+        max: maxSpeed,
         step: 1,
         label: "Speed",
         group: "action",
@@ -418,6 +459,13 @@ export const inspectorDefinitions: Record<
   },
   "speedometer.SpeedometerCircle": {
     inputs: {
+      tickTextColor: {
+        type: "color-palette",
+        options: options.colorPalette,
+        label: "Text Color",
+        group: "presentation",
+        index: 5,
+      },
       attrs: {
         body: {
           fill: {
@@ -437,7 +485,7 @@ export const inspectorDefinitions: Record<
           strokeWidth: {
             type: "range",
             min: 0,
-            max: 30,
+            max: strokeWidthMax,
             step: 1,
             unit: "px",
             label: "Thickness",
@@ -457,7 +505,7 @@ export const inspectorDefinitions: Record<
       speed: {
         type: "range",
         min: 0,
-        max: 100,
+        max: maxSpeed,
         step: 1,
         label: "Speed",
         group: "action",
@@ -762,6 +810,22 @@ export const inspectorDefinitions: Record<
               ],
             },
             index: 4,
+          },
+          rx: {
+            type: "range",
+            min: 0,
+            max: maxRoundedCorners,
+            label: "Rounded corners Horizontal",
+            group: "presentation",
+            index: 5,
+          },
+          ry: {
+            type: "range",
+            min: 0,
+            max: maxRoundedCorners,
+            label: "Rounded corners Vertical",
+            group: "presentation",
+            index: 6,
           },
         },
       },

@@ -759,6 +759,14 @@ export const stencilShapes = {
       type: "speedometer.SpeedometerCircle",
       size: { width: 100, height: 100 },
       name: "Speedometer",
+      attrs: {
+        body: {
+          fill: "#ffffff",
+          stroke: "#353535",
+          strokeWidth: 1,
+          strokeDasharray: "0",
+        },
+      },
       targetAttributes: {
         size: { width: 60, height: 40 },
       },
