@@ -51,7 +51,7 @@ const StencilBackground = joint.dia.HighlighterView.extend({
   },
 });
 export default class StencilService {
-  private stencil: joint.ui.Stencil;
+  stencil: joint.ui.Stencil;
 
   constructor(private readonly stencilContainer: HTMLDivElement) {
     this.stencilContainer = stencilContainer;

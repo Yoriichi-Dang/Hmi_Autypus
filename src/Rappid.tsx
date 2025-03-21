@@ -4,6 +4,8 @@ import SocService from "./services/soc-service";
 import StencilService from "./services/stencil-service";
 import { NavigatorService } from "./services/navigator-service";
 import { HaloService } from "./services/halo-service";
+import { KeyboardService } from "./services/keyboard-service";
+import { InspectorService } from "./services/inspector-service";
 
 function Rappid() {
   const socService = useRef<SocService>(null);
@@ -25,6 +27,14 @@ function Rappid() {
       stencilService: new StencilService(stencilContainer.current),
       navigatorService: new NavigatorService(navigatorContainer.current),
       haloService: new HaloService(),
+      inspectorService: new InspectorService({
+        openGroupsButton: openGroupsButton.current,
+        closeGroupsButton: closeGroupsButton.current,
+        container: inspectorContainer.current,
+        header: inspectorHeader.current,
+        content: inspectorContent.current,
+      }),
+      keyboardService: new KeyboardService(),
     };
     socService.current = new SocService(paperContainer.current, service);
     socService.current.startService();
