@@ -68,7 +68,7 @@ const NavigatorElementView = dia.ElementView.extend({
   },
 });
 
-export class NavigatorService {
+export default class NavigatorService {
   toolbar: ui.Toolbar;
   navigator: ui.Navigator;
   scroller: ui.PaperScroller;

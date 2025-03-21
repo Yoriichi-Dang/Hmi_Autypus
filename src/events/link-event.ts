@@ -1,6 +1,6 @@
 import * as joint from "@joint/plus";
 
-export class LinkEvent {
+export default class LinkEvent {
   paper: joint.dia.Paper;
   graph: joint.dia.Graph;
   constructor(paper: joint.dia.Paper, graph: joint.dia.Graph) {

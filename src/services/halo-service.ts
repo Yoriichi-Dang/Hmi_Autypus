@@ -1,7 +1,7 @@
 import { ui } from "@joint/plus";
 const Position = ui.Halo.HandlePosition;
 
-export class HaloService {
+export default class HaloService {
   create(cellView: joint.dia.CellView) {
     const halo = new ui.Halo({
       cellView,

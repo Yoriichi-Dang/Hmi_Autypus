@@ -1,11 +1,13 @@
 import { useRef, useEffect } from "react";
 import socOneIcon from "/assets/images/socone_1.png";
 import SocService from "./services/soc-service";
-import StencilService from "./services/stencil-service";
-import { NavigatorService } from "./services/navigator-service";
-import { HaloService } from "./services/halo-service";
-import { KeyboardService } from "./services/keyboard-service";
-import { InspectorService } from "./services/inspector-service";
+import {
+  StencilService,
+  NavigatorService,
+  HaloService,
+  KeyboardService,
+  InspectorService,
+} from "./services";
 
 function Rappid() {
   const socService = useRef<SocService>(null);

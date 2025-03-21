@@ -1,6 +1,6 @@
 import * as joint from "@joint/plus";
 
-export class KeyboardService {
+export default class KeyboardService {
   keyboard: joint.ui.Keyboard;
 
   constructor() {

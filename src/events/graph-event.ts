@@ -1,5 +1,5 @@
 import * as joint from "@joint/plus";
-import { defaultPaperSize, pageBreakSettings } from "../services/soc-service";
+import { defaultPaperSize, pageBreakSettings } from "../constants/paper";
 
 export default class GraphEvent {
   paperContainer: HTMLDivElement;
