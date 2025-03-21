@@ -1,12 +1,13 @@
-import { ui, dia, util } from "@joint/plus";
+import * as joint from "@joint/plus";
 import { stencilGroups, stencilShapes } from "../config/stencil";
 import * as appShapes from "../shapes/app-shapes";
-import * as speedometerComponent from "../shapes/speedometer";
+import * as speedometer from "../shapes/speedometer";
 const HIGHLIGHT_COLOR = "#F4F7FB";
 
 // Define a custom highlighter for the stencil hover effect
-const StencilBackground = dia.HighlighterView.extend({
+const StencilBackground = joint.dia.HighlighterView.extend({
   tagName: "rect",
+
   attributes: {
     stroke: "none",
     fill: "transparent",
@@ -24,11 +25,11 @@ const StencilBackground = dia.HighlighterView.extend({
     color: "blue",
     width: null,
     height: null,
-    layer: dia.Paper.Layers.BACK,
+    layer: joint.dia.Paper.Layers.BACK,
   },
 
   // Method called to highlight a CellView
-  highlight(cellView: dia.CellView, _node: Node) {
+  highlight(cellView: joint.dia.CellView) {
     const { padding, width, height } = this.options;
     const bbox = cellView.model.getBBox();
     // Highlighter is always rendered relatively to the CellView origin
@@ -46,46 +47,25 @@ const StencilBackground = dia.HighlighterView.extend({
     bbox.inflate(padding);
     this.vel.attr(bbox.toJSON());
     // Change the color of the highlighter (allow transition)
-    util.nextFrame(() => this.vel.attr("fill", this.options.color));
+    joint.util.nextFrame(() => this.vel.attr("fill", this.options.color));
   },
 });
+export default class StencilService {
+  private stencil: joint.ui.Stencil;
 
-export class StencilService {
-  stencil: ui.Stencil;
-  tooltipGraph: dia.Graph;
-  tooltipPaper: dia.Paper;
-  tooltip: ui.Tooltip;
-
-  constructor(private readonly stencilContainer: HTMLElement) {}
-
-  create(paperScroller: ui.PaperScroller, snaplines: ui.Snaplines) {
-    // Create a new object that combines appShapes and speedometer components
-    const namespace = {
-      ...appShapes,
-      ...speedometerComponent,
-    };
-    this.stencil = new ui.Stencil({
+  constructor(private readonly stencilContainer: HTMLDivElement) {
+    this.stencilContainer = stencilContainer;
+  }
+  createStencil(
+    paperScroller: joint.ui.PaperScroller,
+    snaplines: joint.ui.Snaplines
+  ) {
+    this.stencil = new joint.ui.Stencil({
       paper: paperScroller,
       snaplines: snaplines,
-      width: 240,
-      height: null,
-      groups: this.getStencilGroups(),
       dropAnimation: true,
       groupsToggleButtons: true,
-      paperOptions: function () {
-        return {
-          model: new dia.Graph(
-            {},
-            {
-              cellNamespace: namespace,
-            }
-          ),
-          cellViewNamespace: namespace,
-        };
-      },
-      search: {
-        "*": ["type", "name"],
-      },
+      width: 300,
       layout: {
         columns: 4,
         marginX: 10,
@@ -96,7 +76,28 @@ export class StencilService {
         columnWidth: 36,
         resizeToFit: true,
       },
-      dragStartClone: (cell: dia.Cell) => {
+      search: {
+        "*": ["type", "name"],
+      },
+      paperOptions: function () {
+        return {
+          model: new joint.dia.Graph(
+            {},
+            {
+              cellNamespace: {
+                ...appShapes,
+                ...speedometer,
+              },
+            }
+          ),
+          cellViewNamespace: {
+            ...appShapes,
+            ...speedometer,
+          },
+        };
+      },
+      groups: this.getStencilGroups(),
+      dragStartClone: (cell: joint.dia.Cell) => {
         const clone = this.createFromStencilElement(cell);
         clone.attr({
           label: {
@@ -108,32 +109,10 @@ export class StencilService {
       },
       el: this.stencilContainer,
     });
-
     this.stencil.render();
-
-    this.stencil.on({
-      "element:dragstart": () => this.tooltip.disable(),
-      "element:dragend": () => this.tooltip.enable(),
-    });
-
-    // We create a single tooltip paper that will be reused for all tooltips
-    this.tooltipGraph = new dia.Graph({}, { cellNamespace: namespace });
-    this.tooltipPaper = new dia.Paper({
-      model: this.tooltipGraph,
-      cellViewNamespace: namespace,
-      width: 140,
-      height: 120,
-      async: true,
-      autoFreeze: true,
-      overflow: true,
-      sorting: dia.Paper.sorting.NONE,
-    });
-
-    this.initializeStencilTooltip.call(this);
     this.startHoverListener();
   }
-
-  createFromStencilElement(el: dia.Cell) {
+  createFromStencilElement(el: joint.dia.Cell) {
     const clone = el.clone();
 
     clone.prop(clone.get("targetAttributes"));
@@ -141,68 +120,6 @@ export class StencilService {
 
     return clone;
   }
-
-  buildTooltipContent(cell: dia.Cell) {
-    const { tooltipGraph, tooltipPaper } = this;
-    // Add a copy of the cell to the tooltip graph
-    // Note: We don't have to care about the position of the cell
-    // because the tooltip paper will be transformed to fit the cell
-    tooltipGraph.resetCells([cell.clone()]);
-
-    const shapeNameEl = document.createElement("span");
-    shapeNameEl.append(document.createTextNode(cell.get("name")));
-
-    const documentFragment = document.createDocumentFragment();
-    documentFragment.append(tooltipPaper.el, shapeNameEl);
-
-    tooltipPaper.transformToFitContent({
-      padding: 5,
-      contentArea: cell.getBBox(),
-      verticalAlign: "middle",
-      horizontalAlign: "middle",
-    });
-
-    return documentFragment;
-  }
-
-  initializeStencilTooltip() {
-    this.tooltip = new ui.Tooltip({
-      target: "[model-id]",
-      rootTarget: this.stencil.el,
-      // Tooltip container denotes the area where the tooltip can be shown
-      // It's adding a padding on the top and the bottom of the paper area.
-      container: this.stencilContainer,
-      content: (el: HTMLElement): any => {
-        const groups = Object.keys(this.getStencilGroups());
-
-        const graphs = groups.map((group) => this.stencil.getGraph(group));
-        let stencilElement = null;
-
-        for (const graph of graphs) {
-          const foundElement = graph.getCell(el.getAttribute("model-id"));
-          if (!foundElement) continue;
-
-          stencilElement = foundElement;
-        }
-
-        if (!stencilElement) {
-          // The element should be always found
-          return false;
-        }
-
-        return this.buildTooltipContent(
-          this.createFromStencilElement(stencilElement)
-        );
-      },
-      position: ui.Tooltip.TooltipPosition.Left,
-      positionSelector: ".stencil-container",
-      padding: 10,
-      animation: {
-        duration: "250ms",
-      },
-    });
-  }
-
   setShapes() {
     this.stencil.load(this.getStencilShapes());
   }
@@ -214,10 +131,10 @@ export class StencilService {
   getStencilShapes() {
     return stencilShapes;
   }
-
   startHoverListener() {
     this.stencil.on({
       "group:element:mouseenter": (_, elementView) => {
+        console.log("group:element:mouseenter");
         StencilBackground.add(elementView, "root", "stencil-highlight", {
           padding: 4,
           width: 36,
@@ -226,10 +143,13 @@ export class StencilService {
         });
       },
       "group:element:mouseleave": (groupPaper) => {
+        console.log("group:element:mouseleave");
         StencilBackground.removeAll(groupPaper);
       },
       // Remove all highlights when the user starts dragging an element
       "group:element:pointerdown": (groupPaper) => {
+        console.log("group:element:pointerdown");
+
         StencilBackground.removeAll(groupPaper);
       },
     });

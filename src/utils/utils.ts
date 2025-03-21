@@ -1,5 +1,5 @@
 import * as joint from "@joint/plus/joint-plus";
-import { Point } from "../services/kitchensink-service";
+import { Point } from "../services/old/kitchensink-service";
 export function degreeToRadian(degrees: number): number {
   return degrees * (Math.PI / 180);
 }

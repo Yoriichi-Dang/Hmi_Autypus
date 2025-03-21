@@ -1,20 +1,12 @@
 import { useRef, useEffect } from "react";
 import socOneIcon from "/assets/images/socone_1.png";
-
-import { StencilService } from "./services/stencil-service";
-import { ToolbarService } from "./services/toolbar-service";
-import { InspectorService } from "./services/inspector-service";
-import { HaloService } from "./services/halo-service";
-import { KeyboardService } from "./services/keyboard-service";
+import SocService from "./services/soc-service";
+import StencilService from "./services/stencil-service";
 import { NavigatorService } from "./services/navigator-service";
-import RappidService from "./services/kitchensink-service";
-
-import { sampleGraphs } from "./config/sample-graphs";
+import { HaloService } from "./services/halo-service";
 
 function Rappid() {
-  const rappid = useRef<RappidService>(null);
-  const elementRef = useRef<HTMLDivElement>(null);
-
+  const socService = useRef<SocService>(null);
   // Containers
   const paperContainer = useRef<HTMLDivElement>(null);
   const stencilContainer = useRef<HTMLDivElement>(null);
@@ -29,28 +21,13 @@ function Rappid() {
   const inspectorContent = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const services = {
+    const service = {
       stencilService: new StencilService(stencilContainer.current),
-      toolbarService: new ToolbarService(toolbarContainer.current),
-      inspectorService: new InspectorService({
-        openGroupsButton: openGroupsButton.current,
-        closeGroupsButton: closeGroupsButton.current,
-        container: inspectorContainer.current,
-        header: inspectorHeader.current,
-        content: inspectorContent.current,
-      }),
-      haloService: new HaloService(),
-      keyboardService: new KeyboardService(),
       navigatorService: new NavigatorService(navigatorContainer.current),
+      haloService: new HaloService(),
     };
-
-    rappid.current = new RappidService(
-      elementRef.current!,
-      paperContainer.current!,
-      services
-    );
-
-    rappid.current.startRappid();
+    socService.current = new SocService(paperContainer.current, service);
+    socService.current.startService();
   }, []);
 
   return (
@@ -65,7 +42,7 @@ function Rappid() {
           alt="JointJS"
         />
       </div>
-      <div ref={toolbarContainer} className="toolbar-container"></div>
+      {/* <div ref={toolbarContainer} className="toolbar-container"></div> */}
       <div className="app-body">
         <div ref={stencilContainer} className="stencil-container"></div>
         <div ref={paperContainer} className="paper-container"></div>
