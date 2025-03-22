@@ -4,7 +4,7 @@ import { GraphEvent, ElementEvent, LinkEvent, PaperEvent } from "../events";
 import { ContextToolbarService, SelectionService } from "../services";
 import * as appShapes from "../shapes/app-shapes";
 import * as joint from "@joint/plus";
-
+import { SocComponent } from "../components/soc-component";
 export default class SocService {
   graphElements: GraphElements;
   services: ServiceGroup;
@@ -46,6 +46,21 @@ export default class SocService {
     this.initKeyBoardShortcuts();
     this.initContextToolbar();
     this.startEvent();
+    const arcMeter = new SocComponent.ArcValue(
+      "speedometer",
+      "km/h",
+      { min: 20, max: 220 },
+      { start: 170, middle: 270 },
+      11,
+      1,
+      true
+    );
+
+    // Thêm vào paper
+    arcMeter.addTo(this.graphElements.graph);
+
+    // Thiết lập giá trị
+    arcMeter.setValue(75);
   }
 
   startEvent() {
@@ -74,7 +89,6 @@ export default class SocService {
         this.graphElements.paperScroller
       ),
     };
-
     this.events.linkEvent.createEventLink();
     this.events.elementEvent.createElementEvent();
     this.events.graphEvent.createGraphEvent();
@@ -88,7 +102,10 @@ export default class SocService {
     const graph = (this.graphElements.graph = new joint.dia.Graph(
       {},
       {
-        cellNamespace: joint.shapes,
+        cellNamespace: {
+          ...joint.shapes,
+          ...SocComponent,
+        },
       }
     ));
     this.graphElements.commandManager = new joint.dia.CommandManager({
@@ -134,7 +151,10 @@ export default class SocService {
           return joint.routers.rightAngle.call(this, vertices, opt, linkView);
         },
       },
-      cellViewNamespace: joint.shapes,
+      cellViewNamespace: {
+        ...joint.shapes,
+        ...SocComponent,
+      },
     }));
     this.graphElements.snaplines = new joint.ui.Snaplines({ paper: paper });
 
@@ -192,6 +212,7 @@ export default class SocService {
     });
 
     this.services.selectionService = new SelectionService(
+      this.graphElements.graph,
       this.graphElements.paper,
       this.graphElements.selection,
       this.services.inspectorService,

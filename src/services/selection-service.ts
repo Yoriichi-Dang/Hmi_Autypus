@@ -1,18 +1,22 @@
 import * as joint from "@joint/plus";
 import InspectorService from "./inspector-service";
 import HaloService from "./halo-service";
+import { toggleSelection } from "../utils/group-element";
 
 export default class SelectionService {
+  graph: joint.dia.Graph;
   paper: joint.dia.Paper;
   selection: joint.ui.Selection;
   inspectorService: InspectorService;
   haloService: HaloService;
   constructor(
+    graph: joint.dia.Graph,
     paper: joint.dia.Paper,
     selection: joint.ui.Selection,
     inspectorService: InspectorService,
     haloService: HaloService
   ) {
+    this.graph = graph;
     this.paper = paper;
     this.selection = selection;
     this.inspectorService = inspectorService;
@@ -29,7 +33,7 @@ export default class SelectionService {
       const primaryCellView = this.paper.findViewByModel(primaryCell);
       this.selection.destroySelectionBox(primaryCell);
       this.selectPrimaryCell(primaryCellView);
-    } else if (collection.length === 2) {
+    } else if (collection.length > 1) {
       collection.each((cell: joint.dia.Cell) => {
         this.selection.createSelectionBox(cell);
       });
@@ -49,7 +53,7 @@ export default class SelectionService {
 
   selectPrimaryElement(elementView: joint.dia.ElementView) {
     const element = elementView.model;
-
+    console.log(element);
     new joint.ui.FreeTransform({
       cellView: elementView,
       allowRotation: false,
