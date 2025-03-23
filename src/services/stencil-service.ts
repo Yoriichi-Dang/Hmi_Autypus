@@ -2,6 +2,7 @@ import * as joint from "@joint/plus";
 import { stencilGroups, stencilShapes } from "../config/stencil";
 import * as appShapes from "../shapes/app-shapes";
 import * as speedometer from "../shapes/speedometer";
+import * as dashboardV1 from "../components/dashboard-v1";
 const HIGHLIGHT_COLOR = "#F4F7FB";
 
 // Define a custom highlighter for the stencil hover effect
@@ -60,6 +61,12 @@ export default class StencilService {
     paperScroller: joint.ui.PaperScroller,
     snaplines: joint.ui.Snaplines
   ) {
+    const namespace = {
+      ...appShapes,
+      ...dashboardV1,
+      ...speedometer,
+    };
+    console.log(namespace);
     this.stencil = new joint.ui.Stencil({
       paper: paperScroller,
       snaplines: snaplines,
@@ -84,16 +91,10 @@ export default class StencilService {
           model: new joint.dia.Graph(
             {},
             {
-              cellNamespace: {
-                ...appShapes,
-                ...speedometer,
-              },
+              cellNamespace: namespace,
             }
           ),
-          cellViewNamespace: {
-            ...appShapes,
-            ...speedometer,
-          },
+          cellViewNamespace: namespace,
         };
       },
       groups: this.getStencilGroups(),

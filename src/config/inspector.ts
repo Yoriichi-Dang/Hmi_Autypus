@@ -282,6 +282,14 @@ const options = {
     },
   ],
 };
+// const dashboardV1InspectorDefinitions: Record<
+//   string,
+//   { inputs: any; groups: any }
+// > = {
+//   "dashboardV1.Speedometer": {
+//     inputs: {},
+//   },
+// };
 
 export const inspectorDefinitions: Record<
   string,

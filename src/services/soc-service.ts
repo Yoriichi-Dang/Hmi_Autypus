@@ -4,7 +4,7 @@ import { GraphEvent, ElementEvent, LinkEvent, PaperEvent } from "../events";
 import { ContextToolbarService, SelectionService } from "../services";
 import * as appShapes from "../shapes/app-shapes";
 import * as joint from "@joint/plus";
-import { SocComponent } from "../components/soc-component";
+import { DashboardV1 } from "../components/dashboard-v1";
 export default class SocService {
   graphElements: GraphElements;
   services: ServiceGroup;
@@ -48,8 +48,8 @@ export default class SocService {
     this.startEvent();
     // const fuelGauge = new SocComponent.FuelGauge();
     // fuelGauge.addTo(this.graphElements.graph);
-    const coolantTemperature = new SocComponent.CoolantTemperature();
-    coolantTemperature.addTo(this.graphElements.graph);
+    const fuelGauge = new DashboardV1.FuelGauge();
+    fuelGauge.addTo(this.graphElements.graph);
   }
 
   startEvent() {
@@ -93,7 +93,7 @@ export default class SocService {
       {
         cellNamespace: {
           ...joint.shapes,
-          ...SocComponent,
+          ...DashboardV1,
         },
       }
     ));
@@ -142,7 +142,7 @@ export default class SocService {
       },
       cellViewNamespace: {
         ...joint.shapes,
-        ...SocComponent,
+        ...DashboardV1,
       },
     }));
     this.graphElements.snaplines = new joint.ui.Snaplines({ paper: paper });

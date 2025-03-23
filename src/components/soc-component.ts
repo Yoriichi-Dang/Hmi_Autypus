@@ -1,31 +1,16 @@
 import * as joint from "@joint/plus";
-import { degreeToRadian } from "../utils/utils";
+import { calculateArc, degreeToRadian } from "../utils/utils";
 
-type Value = {
+export type Value = {
   min: number;
   max: number;
 };
 
-type AngleArc = {
+export type AngleArc = {
   start: number;
   end?: number;
   middle: number;
 };
-
-function calculateArc(
-  value: Value,
-  angleArc: AngleArc,
-  numberPart: number,
-  numberSubPart: number
-) {
-  const distanceAngle = angleArc.end - angleArc.start;
-  const partAngle = distanceAngle / (numberPart - 1);
-  const partValue = (value.max - value.min) / (numberPart - 1);
-  const subPartAngle = partAngle / (numberSubPart + 1);
-  const subPartValue = partValue / (numberSubPart + 1);
-  return { distanceAngle, partAngle, partValue, subPartAngle, subPartValue };
-}
-
 // Symmetrical Arc
 export namespace SocComponent {
   export class ArcValue extends joint.dia.Element {
@@ -121,43 +106,43 @@ export namespace SocComponent {
       };
 
       // Set up indicator line
-      // attrs.line = {
-      //   d: `M ${centerX} ${centerY} L ${
-      //     centerX + r * 0.8 * Math.cos(degreeToRadian(angleArc.start))
-      //   } ${centerY + r * 0.8 * Math.sin(degreeToRadian(angleArc.start))}`,
-      //   stroke: "blue",
-      //   strokeWidth: 3,
-      //   strokeLinecap: "round",
-      // };
-      const lineCirlceRadius = 4;
-      const angleInDegrees =
-        Math.acos(lineCirlceRadius / (0.85 * r)) * (180 / Math.PI);
-
       attrs.line = {
-        d: `
-        M ${
-          centerX +
-          lineCirlceRadius * Math.cos(degreeToRadian(180 - angleInDegrees))
-        } ${
-          centerY +
-          lineCirlceRadius * Math.sin(degreeToRadian(180 - angleInDegrees))
-        }
-        L ${centerX + r * 0.85 * Math.cos(degreeToRadian(angleArc.start))} ${
-          centerY + r * 0.85 * Math.sin(degreeToRadian(angleArc.start))
-        }
-        L ${
-          centerX +
-          lineCirlceRadius * Math.cos(degreeToRadian(180 + angleInDegrees))
-        } 
-        ${
-          centerY +
-          lineCirlceRadius * Math.sin(degreeToRadian(180 + angleInDegrees))
-        }
-        Z
-        `,
+        d: `M ${centerX} ${centerY} L ${
+          centerX + r * 0.8 * Math.cos(degreeToRadian(angleArc.start))
+        } ${centerY + r * 0.8 * Math.sin(degreeToRadian(angleArc.start))}`,
+        stroke: "black",
+        strokeWidth: 3,
         strokeLinecap: "round",
-        fill: "black",
       };
+      const lineCirlceRadius = 4;
+      // const angleInDegrees =
+      //   Math.acos(lineCirlceRadius / (0.85 * r)) * (180 / Math.PI);
+      // console.log(angleInDegrees);
+      // attrs.line = {
+      //   d: `
+      //   M ${
+      //     centerX +
+      //     lineCirlceRadius * Math.cos(degreeToRadian(180 - angleInDegrees))
+      //   } ${
+      //     centerY +
+      //     lineCirlceRadius * Math.sin(degreeToRadian(180 - angleInDegrees))
+      //   }
+      //   L ${centerX + r * 0.85 * Math.cos(degreeToRadian(angleArc.start))} ${
+      //     centerY + r * 0.85 * Math.sin(degreeToRadian(angleArc.start))
+      //   }
+      //   L ${
+      //     centerX +
+      //     lineCirlceRadius * Math.cos(degreeToRadian(180 + angleInDegrees))
+      //   }
+      //   ${
+      //     centerY +
+      //     lineCirlceRadius * Math.sin(degreeToRadian(180 + angleInDegrees))
+      //   }
+      //   Z
+      //   `,
+      //   strokeLinecap: "round",
+      //   fill: "black",
+      // };
 
       attrs.center = {
         cx: centerX,
@@ -326,127 +311,5 @@ export namespace SocComponent {
         (currentAngle - angleArc.start) / (angleArc.end - angleArc.start);
       return value.min + angleRatio * (value.max - value.min);
     }
-  }
-  export class Speedometer extends ArcValue {
-    defaults() {
-      return joint.util.defaultsDeep(
-        {
-          type: "arc.Speedometer",
-          size: { width: 200, height: 200 },
-          attrs: {
-            root: { magnetSelector: "body" },
-            body: {
-              fill: "white",
-            },
-          },
-          value: {
-            min: 20,
-            max: 220,
-          },
-          angleArc: {
-            start: 135,
-            middle: 270,
-          },
-          numberPart: 11,
-          numberSubPart: 1,
-          showLabel: true,
-          label: "km/h",
-        },
-        joint.dia.Element.prototype.defaults
-      );
-    }
-    initialize(): void {
-      super.initialize(this.attributes);
-    }
-  }
-  export class RpmGauge extends ArcValue {
-    defaults() {
-      return joint.util.defaultsDeep(
-        {
-          type: "arc.RpmGauge",
-          size: { width: 200, height: 200 },
-          attrs: {
-            root: { magnetSelector: "body" },
-          },
-          value: {
-            min: 1,
-            max: 6,
-          },
-          angleArc: {
-            start: 135,
-            middle: 270,
-          },
-          numberPart: 6,
-          numberSubPart: 1,
-          showLabel: true,
-          label: "x1000",
-        },
-        joint.dia.Element.prototype.defaults
-      );
-    }
-    initialize(): void {
-      super.initialize(this.attributes);
-    }
-  }
-  export class FuelGauge extends ArcValue {
-    defaults() {
-      return joint.util.defaultsDeep(
-        {
-          type: "arc.RpmGauge",
-          size: { width: 200, height: 200 },
-          attrs: {
-            root: { magnetSelector: "body" },
-          },
-          value: {
-            min: 1,
-            max: 6,
-          },
-          angleArc: {
-            start: 270,
-            middle: 315,
-          },
-          numberPart: 6,
-          numberSubPart: 1,
-          showLabel: true,
-        },
-        joint.dia.Element.prototype.defaults
-      );
-    }
-    initialize(): void {
-      super.initialize(this.attributes);
-    }
-    initLabel(): void {}
-  }
-  export class CoolantTemperature extends ArcValue {
-    defaults() {
-      return joint.util.defaultsDeep(
-        {
-          type: "arc.CoolantTemperature",
-          size: { width: 200, height: 200 },
-          attrs: {
-            root: { magnetSelector: "body" },
-            body: {
-              fill: "white",
-            },
-          },
-          value: {
-            min: 50,
-            max: 140,
-          },
-          angleArc: {
-            start: 180,
-            middle: 225,
-          },
-          numberPart: 3,
-          numberSubPart: 3,
-          showLabel: true,
-        },
-        joint.dia.Element.prototype.defaults
-      );
-    }
-    initialize(): void {
-      super.initialize(this.attributes);
-    }
-    initLabel() {}
   }
 }
