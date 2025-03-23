@@ -53,7 +53,7 @@ export default class SelectionService {
 
   selectPrimaryElement(elementView: joint.dia.ElementView) {
     const element = elementView.model;
-    console.log(element);
+
     new joint.ui.FreeTransform({
       cellView: elementView,
       allowRotation: false,
@@ -65,7 +65,6 @@ export default class SelectionService {
     this.haloService.create(elementView);
   }
   selectPrimaryLink(linkView: joint.dia.LinkView) {
-    console.log(linkView);
     const ns = joint.linkTools;
     const tools = [
       new ns.Vertices(),

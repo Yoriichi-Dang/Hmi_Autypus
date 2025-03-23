@@ -29,73 +29,19 @@ function calculateArc(
 // Symmetrical Arc
 export namespace SocComponent {
   export class ArcValue extends joint.dia.Element {
-    value: Value;
-    angleArc: AngleArc;
-    numberSubPart: number;
-    numberPart: number;
-    showLabel: boolean;
-    name: string;
-    label: string;
-    icon?: string;
-
-    constructor(
-      name: string,
-      label: string,
-      value: Value,
-      angleArc: AngleArc,
-      numberPart: number,
-      numberSubPart: number,
-      showLabel: boolean,
-      icon?: string,
-      attributes?: joint.dia.Element.Attributes,
-      options?: any
-    ) {
-      // Ensure angleArc.end is properly defined before passing to super
-      const completeAngleArc = { ...angleArc };
-      if (completeAngleArc.end === undefined) {
-        const distanceAngle = completeAngleArc.middle - completeAngleArc.start;
-        completeAngleArc.end = distanceAngle + completeAngleArc.middle;
-      }
-
-      // Store constructor parameters as instance properties
-      const attrs = joint.util.defaultsDeep(
-        {
-          name: name,
-          label: label,
-          icon: icon,
-          value: value,
-          angleArc: completeAngleArc,
-          numberPart: numberPart,
-          numberSubPart: numberSubPart,
-          currentAngle: completeAngleArc.start,
-          showLabel: showLabel,
-        },
-        attributes || {}
-      );
-
-      super(attrs, options);
-
-      this.value = value;
-      this.angleArc = completeAngleArc;
-      this.numberPart = numberPart;
-      this.numberSubPart = numberSubPart;
-      this.showLabel = showLabel;
-      this.name = name;
-      this.label = label;
-      this.icon = icon;
-    }
-
-    preinitialize(attributes?: joint.dia.Element.Attributes): void {
+    initSvg() {
+      const numberPart = this.get("numberPart");
+      const numberSubPart = this.get("numberSubPart");
       let partTextMarkup = "";
-      for (let i = 0; i < attributes.numberPart; i++) {
+      for (let i = 0; i < numberPart; i++) {
         partTextMarkup += `
             <g>
                <text @selector="part_${i}" />
                <path @selector="part_${i}_line" />`;
 
         // Only add subpart lines if this isn't the last part
-        if (i < attributes.numberPart - 1) {
-          for (let j = 1; j <= attributes.numberSubPart; j++) {
+        if (i < numberPart - 1) {
+          for (let j = 1; j <= numberSubPart; j++) {
             partTextMarkup += `
                <path @selector="subpart_${i}_${j}_line" />`;
           }
@@ -109,16 +55,21 @@ export namespace SocComponent {
               <g @selector="body">
                   <path @selector="arc" />
                   <text @selector="label" />
+                <g>
                   <path @selector="line" />
+                  <circle @selector="center" />
+                </g>
                   ${partTextMarkup}
               </g>
           `;
     }
 
     initialize(attributes?: joint.dia.Element.Attributes): void {
+      attributes.angleArc["end"] =
+        2 * attributes.angleArc["middle"] - attributes.angleArc["start"];
       super.initialize(attributes);
+      this.initSvg();
       this.on("change:size", this.onResize, this);
-      console.log("Init", attributes);
       this.initPartLabel();
     }
 
@@ -134,7 +85,7 @@ export namespace SocComponent {
 
       // Update text positions after resize
       this.initPartLabel();
-      this.setValue(this.getValue());
+      // this.setValue(this.getValue());
     }
 
     initPartLabel(): void {
@@ -150,7 +101,6 @@ export namespace SocComponent {
       const numberSubPart: number = this.get("numberSubPart");
       const showLabel: boolean = this.get("showLabel");
       const label = this.get("label");
-      console.log(value, angleArc, numberPart, numberSubPart, showLabel, label);
       const { partAngle, partValue, subPartAngle } = calculateArc(
         value,
         angleArc,
@@ -171,13 +121,49 @@ export namespace SocComponent {
       };
 
       // Set up indicator line
+      // attrs.line = {
+      //   d: `M ${centerX} ${centerY} L ${
+      //     centerX + r * 0.8 * Math.cos(degreeToRadian(angleArc.start))
+      //   } ${centerY + r * 0.8 * Math.sin(degreeToRadian(angleArc.start))}`,
+      //   stroke: "blue",
+      //   strokeWidth: 3,
+      //   strokeLinecap: "round",
+      // };
+      const lineCirlceRadius = 4;
+      const angleInDegrees =
+        Math.acos(lineCirlceRadius / (0.85 * r)) * (180 / Math.PI);
+
       attrs.line = {
-        d: `M ${centerX} ${centerY} L ${
-          centerX + r * 0.8 * Math.cos(degreeToRadian(angleArc.start))
-        } ${centerY + r * 0.8 * Math.sin(degreeToRadian(angleArc.start))}`,
-        stroke: "red",
-        strokeWidth: 2,
+        d: `
+        M ${
+          centerX +
+          lineCirlceRadius * Math.cos(degreeToRadian(180 - angleInDegrees))
+        } ${
+          centerY +
+          lineCirlceRadius * Math.sin(degreeToRadian(180 - angleInDegrees))
+        }
+        L ${centerX + r * 0.85 * Math.cos(degreeToRadian(angleArc.start))} ${
+          centerY + r * 0.85 * Math.sin(degreeToRadian(angleArc.start))
+        }
+        L ${
+          centerX +
+          lineCirlceRadius * Math.cos(degreeToRadian(180 + angleInDegrees))
+        } 
+        ${
+          centerY +
+          lineCirlceRadius * Math.sin(degreeToRadian(180 + angleInDegrees))
+        }
+        Z
+        `,
         strokeLinecap: "round",
+        fill: "black",
+      };
+
+      attrs.center = {
+        cx: centerX,
+        cy: centerY,
+        r: lineCirlceRadius,
+        fill: "gray",
       };
 
       // Set up part marks and subpart marks
@@ -241,16 +227,19 @@ export namespace SocComponent {
           }
         }
       }
-      attrs.label = {
-        x: centerX,
-        y: centerY * 0.7,
-        text: label,
-        textAnchor: "middle",
-        alignmentBaseline: "middle",
-        fontSize: width * 0.04,
-        fontFamily: "Arial",
-        fill: "gray",
-      };
+      if (label) {
+        attrs.label = {
+          x: centerX,
+          y: centerY * 0.7,
+          text: label,
+          textAnchor: "middle",
+          alignmentBaseline: "middle",
+          fontSize: width * 0.04,
+          fontFamily: "Arial",
+          fill: "gray",
+        };
+      }
+
       this.attr(attrs);
     }
 
@@ -297,19 +286,16 @@ export namespace SocComponent {
 
     // Method to set current value and update indicator
     setValue(val: number): this {
+      const value = this.get("value");
+      const angleArc = this.get("angleArc");
       // use when init
       // Limit value to min-max range
-      const currentValue = Math.max(
-        this.value.min,
-        Math.min(this.value.max, val)
-      );
+      const currentValue = Math.max(value.min, Math.min(value.max, val));
 
       // Calculate angle corresponding to value
-      const valueRatio =
-        (currentValue - this.value.min) / (this.value.max - this.value.min);
+      const valueRatio = (currentValue - value.min) / (value.max - value.min);
       const currentAngle =
-        this.angleArc.start +
-        valueRatio * (this.angleArc.end - this.angleArc.start);
+        angleArc.start + valueRatio * (angleArc.end - angleArc.start);
 
       // Update angle and position of indicator
       this.set("currentAngle", currentAngle);
@@ -333,26 +319,134 @@ export namespace SocComponent {
 
     // Method to get current value
     getValue(): number {
+      const value = this.get("value");
+      const angleArc = this.get("angleArc");
       const currentAngle = this.get("currentAngle");
       const angleRatio =
-        (currentAngle - this.angleArc.start) /
-        (this.angleArc.end - this.angleArc.start);
-      return this.value.min + angleRatio * (this.value.max - this.value.min);
+        (currentAngle - angleArc.start) / (angleArc.end - angleArc.start);
+      return value.min + angleRatio * (value.max - value.min);
     }
-
-    // Override defaults method to set default properties
-    defaults(): Partial<joint.dia.Element.Attributes> {
-      console.log("Call default");
+  }
+  export class Speedometer extends ArcValue {
+    defaults() {
       return joint.util.defaultsDeep(
         {
-          type: "arc.ArcValue",
+          type: "arc.Speedometer",
           size: { width: 200, height: 200 },
           attrs: {
             root: { magnetSelector: "body" },
+            body: {
+              fill: "white",
+            },
           },
+          value: {
+            min: 20,
+            max: 220,
+          },
+          angleArc: {
+            start: 135,
+            middle: 270,
+          },
+          numberPart: 11,
+          numberSubPart: 1,
+          showLabel: true,
+          label: "km/h",
         },
         joint.dia.Element.prototype.defaults
       );
     }
+    initialize(): void {
+      super.initialize(this.attributes);
+    }
+  }
+  export class RpmGauge extends ArcValue {
+    defaults() {
+      return joint.util.defaultsDeep(
+        {
+          type: "arc.RpmGauge",
+          size: { width: 200, height: 200 },
+          attrs: {
+            root: { magnetSelector: "body" },
+          },
+          value: {
+            min: 1,
+            max: 6,
+          },
+          angleArc: {
+            start: 135,
+            middle: 270,
+          },
+          numberPart: 6,
+          numberSubPart: 1,
+          showLabel: true,
+          label: "x1000",
+        },
+        joint.dia.Element.prototype.defaults
+      );
+    }
+    initialize(): void {
+      super.initialize(this.attributes);
+    }
+  }
+  export class FuelGauge extends ArcValue {
+    defaults() {
+      return joint.util.defaultsDeep(
+        {
+          type: "arc.RpmGauge",
+          size: { width: 200, height: 200 },
+          attrs: {
+            root: { magnetSelector: "body" },
+          },
+          value: {
+            min: 1,
+            max: 6,
+          },
+          angleArc: {
+            start: 270,
+            middle: 315,
+          },
+          numberPart: 6,
+          numberSubPart: 1,
+          showLabel: true,
+        },
+        joint.dia.Element.prototype.defaults
+      );
+    }
+    initialize(): void {
+      super.initialize(this.attributes);
+    }
+    initLabel(): void {}
+  }
+  export class CoolantTemperature extends ArcValue {
+    defaults() {
+      return joint.util.defaultsDeep(
+        {
+          type: "arc.CoolantTemperature",
+          size: { width: 200, height: 200 },
+          attrs: {
+            root: { magnetSelector: "body" },
+            body: {
+              fill: "white",
+            },
+          },
+          value: {
+            min: 50,
+            max: 140,
+          },
+          angleArc: {
+            start: 180,
+            middle: 225,
+          },
+          numberPart: 3,
+          numberSubPart: 3,
+          showLabel: true,
+        },
+        joint.dia.Element.prototype.defaults
+      );
+    }
+    initialize(): void {
+      super.initialize(this.attributes);
+    }
+    initLabel() {}
   }
 }

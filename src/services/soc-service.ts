@@ -46,21 +46,10 @@ export default class SocService {
     this.initKeyBoardShortcuts();
     this.initContextToolbar();
     this.startEvent();
-    const arcMeter = new SocComponent.ArcValue(
-      "speedometer",
-      "km/h",
-      { min: 20, max: 220 },
-      { start: 170, middle: 270 },
-      11,
-      1,
-      true
-    );
-
-    // Thêm vào paper
-    arcMeter.addTo(this.graphElements.graph);
-
-    // Thiết lập giá trị
-    arcMeter.setValue(75);
+    // const fuelGauge = new SocComponent.FuelGauge();
+    // fuelGauge.addTo(this.graphElements.graph);
+    const coolantTemperature = new SocComponent.CoolantTemperature();
+    coolantTemperature.addTo(this.graphElements.graph);
   }
 
   startEvent() {
