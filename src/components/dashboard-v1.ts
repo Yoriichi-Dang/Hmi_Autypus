@@ -7,12 +7,7 @@ export namespace dashboardV1 {
         {
           type: "dashboardV1.Speedometer",
           size: { width: 200, height: 200 },
-          attrs: {
-            root: { magnetSelector: "body" },
-            body: {
-              fill: "white",
-            },
-          },
+          targetValue: 20,
           value: {
             min: 20,
             max: 220,
@@ -40,9 +35,7 @@ export namespace dashboardV1 {
         {
           type: "dashboardV1.Tachometer",
           size: { width: 200, height: 200 },
-          attrs: {
-            root: { magnetSelector: "body" },
-          },
+          targetValue: 1,
           value: {
             min: 1,
             max: 6,
@@ -69,9 +62,7 @@ export namespace dashboardV1 {
         {
           type: "dashboardV1.FuelGauge",
           size: { width: 200, height: 200 },
-          attrs: {
-            root: { magnetSelector: "body" },
-          },
+          targetValue: 1,
           value: {
             min: 1,
             max: 6,
@@ -104,6 +95,8 @@ export namespace dashboardV1 {
               fill: "white",
             },
           },
+          targetValue: 50,
+          currentAngle: 180,
           value: {
             min: 50,
             max: 140,
