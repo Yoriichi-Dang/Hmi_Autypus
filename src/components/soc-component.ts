@@ -11,11 +11,27 @@ export type AngleArc = {
   end?: number;
   middle: number;
 };
+
+// Đối tượng cấu hình animation
+export type AnimationOptions = {
+  duration: number; // Thời lượng animation (ms)
+  easing: "linear" | "easeInOut" | "elastic"; // Kiểu easing
+  fps: number; // Frames per second (mặc định: 60)
+};
+
 // Symmetrical Arc
 export namespace SocComponent {
   export class ArcValue extends joint.dia.Element {
     private animationId: number | null = null;
-    private animationSpeed: number = 5;
+    private animationStartTime: number = 0;
+    private animationStartAngle: number = 0;
+    private currentDisplayAngle: number | null = null; // Thêm biến theo dõi góc hiện tại
+    private animationOptions: AnimationOptions = {
+      duration: 500, // 500ms mặc định
+      easing: "easeInOut",
+      fps: 60,
+    };
+
     initSvg() {
       const numberPart = this.get("numberPart");
       const numberSubPart = this.get("numberSubPart");
@@ -63,17 +79,55 @@ export namespace SocComponent {
         this
       );
       this.on("change:targetValue", this.onValueChange, this);
+      this.on("change:animationOptions", this.updateAnimationOptions, this);
+
+      // Thiết lập giá trị targetValue ban đầu nếu chưa có
+      if (attributes.targetValue === undefined && attributes.value) {
+        // Sử dụng giá trị trung bình của phạm vi làm giá trị mặc định
+        const value = attributes.value;
+        attributes.targetValue = (value.min + value.max) / 2;
+      }
+
+      // Khởi tạo giá trị góc hiện tại bằng góc tương ứng với targetValue ban đầu
+      if (
+        attributes.targetValue !== undefined &&
+        attributes.value &&
+        attributes.angleArc
+      ) {
+        const valueRatio =
+          (attributes.targetValue - attributes.value.min) /
+          (attributes.value.max - attributes.value.min);
+        this.currentDisplayAngle =
+          attributes.angleArc.start +
+          valueRatio * (attributes.angleArc.end - attributes.angleArc.start);
+      } else {
+        this.currentDisplayAngle = attributes.angleArc?.start || 0;
+      }
+
       this.initPartLabel();
       super.initialize(attributes);
     }
+
+    // Phương thức cập nhật tùy chọn animation
+    updateAnimationOptions(options?: Partial<AnimationOptions>): void {
+      if (options) {
+        this.animationOptions = {
+          ...this.animationOptions,
+          ...options,
+        };
+      }
+    }
+
     onValueChange() {
       const targetValue = this.get("targetValue");
       this.setValue(targetValue);
     }
+
     applyFilters(): void {
       const filter = this.attr("arc/filter");
       console.log(filter);
     }
+
     onResize(
       element: joint.dia.Element,
       newSize: { width: number; height: number },
@@ -124,7 +178,6 @@ export namespace SocComponent {
         };
 
         // Set up indicator line
-
         const lineCirlceRadius = 4;
         attrs.center = {
           cx: centerX,
@@ -211,30 +264,78 @@ export namespace SocComponent {
         this.drawLine();
       }
     }
+
     drawLine(): void {
       const width = this.get("size").width;
       const height = this.get("size").height;
       const r = Math.min(width, height) / 2;
       const centerX = width / 2;
       const centerY = height / 2;
-      const angleArc: AngleArc = this.get("angleArc");
+
+      // Sử dụng góc hiện tại hoặc tính toán từ targetValue nếu chưa có
+      let currentAngle = this.currentDisplayAngle;
+      if (currentAngle === null) {
+        const targetValue = this.get("targetValue");
+        const value: Value = this.get("value");
+        const angleArc: AngleArc = this.get("angleArc");
+
+        // Tính toán góc dựa trên targetValue
+        if (targetValue !== undefined) {
+          const valueRatio =
+            (targetValue - value.min) / (value.max - value.min);
+          currentAngle =
+            angleArc.start + valueRatio * (angleArc.end - angleArc.start);
+        } else {
+          currentAngle = angleArc.start;
+        }
+
+        // Cập nhật biến theo dõi góc hiện tại
+        this.currentDisplayAngle = currentAngle;
+      }
+
+      // Vẽ line tại vị trí góc hiện tại
+      const radians = degreeToRadian(currentAngle);
       const line = {
         d: `M ${centerX} ${centerY} L ${
-          centerX + r * 0.8 * Math.cos(degreeToRadian(angleArc.start))
-        } ${centerY + r * 0.8 * Math.sin(degreeToRadian(angleArc.start))}`,
+          centerX + r * 0.8 * Math.cos(radians)
+        } ${centerY + r * 0.8 * Math.sin(radians)}`,
         stroke: "black",
         strokeWidth: 3,
         strokeLinecap: "round",
       };
+
       this.attr("line", line);
     }
+
     stopRotation(): void {
       if (this.animationId !== null) {
         cancelAnimationFrame(this.animationId);
         this.animationId = null;
       }
     }
-    updateLineValue(): void {}
+
+    // Hàm easing để làm cho animation mượt mà hơn
+    private easing(t: number, type: string = "easeInOut"): number {
+      switch (type) {
+        case "linear":
+          return t;
+        case "easeInOut":
+          // Cubic easing in/out - acceleration until halfway, then deceleration
+          return t < 0.5
+            ? 4 * t * t * t
+            : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+        case "elastic":
+          // Elastic bounce effect at the end
+          const p = 0.3;
+          return (
+            Math.pow(2, -10 * t) * Math.sin(((t - p / 4) * (2 * Math.PI)) / p) +
+            1
+          );
+        default:
+          return t;
+      }
+    }
+
     // Method to generate arc path
     private generateArcPath(
       cx: number,
@@ -275,82 +376,111 @@ export namespace SocComponent {
         y: centerY + radius * Math.sin(angleInRadians),
       };
     }
-    private getCurrentAngle(): number {
-      const value: Value = this.get("value");
-      const targetValue = this.get("targetValue");
-      const angleArc: AngleArc = this.get("angleArc");
-      const valueRatio = (targetValue - value.min) / (value.max - value.min);
-      return angleArc.start + valueRatio * (angleArc.end - angleArc.start);
-    }
-    private animateToAngle(targetAngle: number): void {
-      if (this.animationId !== null) {
-        cancelAnimationFrame(this.animationId);
-      }
 
+    // Animation giống SpeedometerArc nhưng sử dụng góc hiện tại đã lưu
+    private animateToAngle(targetAngle: number): void {
+      // Dừng animation hiện tại nếu có
+      this.stopRotation();
+
+      // Sử dụng góc hiện tại đã được lưu
+      const currentAngle =
+        this.currentDisplayAngle !== null
+          ? this.currentDisplayAngle
+          : this.get("angleArc").start;
+
+      // Lưu thời điểm bắt đầu animation và góc bắt đầu
+      this.animationStartTime = performance.now();
+      this.animationStartAngle = currentAngle;
+
+      const animate = () => {
+        const elapsed = performance.now() - this.animationStartTime;
+        const duration = this.animationOptions.duration;
+
+        // Tính tỉ lệ hoàn thành (0-1)
+        let progress = Math.min(elapsed / duration, 1);
+
+        // Áp dụng hàm easing để có chuyển động mượt mà
+        progress = this.easing(progress, this.animationOptions.easing);
+
+        // Tính chênh lệch góc, điều chỉnh cho trường hợp vượt qua 0/360 độ
+        let angleDiff = targetAngle - this.animationStartAngle;
+
+        // Điều chỉnh chênh lệch để đi đường ngắn nhất
+        if (Math.abs(angleDiff) > 180) {
+          if (angleDiff > 0) {
+            angleDiff -= 360;
+          } else {
+            angleDiff += 360;
+          }
+        }
+
+        const newAngle = this.animationStartAngle + angleDiff * progress;
+
+        // Cập nhật vị trí của line và lưu góc hiện tại
+        this.updateNeedlePosition(newAngle);
+        this.currentDisplayAngle = newAngle;
+
+        // Tiếp tục animation nếu chưa hoàn thành
+        if (progress < 1) {
+          this.animationId = requestAnimationFrame(animate);
+        } else {
+          // Đảm bảo kết thúc chính xác tại vị trí đích
+          this.updateNeedlePosition(targetAngle);
+          this.currentDisplayAngle = targetAngle;
+          this.animationId = null;
+        }
+      };
+
+      // Bắt đầu animation
+      this.animationId = requestAnimationFrame(animate);
+    }
+
+    // Cập nhật vị trí needle (line)
+    private updateNeedlePosition(angle: number): void {
       const width = this.get("size").width;
       const height = this.get("size").height;
       const r = Math.min(width, height) / 2;
       const centerX = width / 2;
       const centerY = height / 2;
 
-      let currentAngle = this.getCurrentAngle();
+      const radians = degreeToRadian(angle);
+      const needleLength = r * 0.8;
+      const needleEndX = centerX + needleLength * Math.cos(radians);
+      const needleEndY = centerY + needleLength * Math.sin(radians);
 
-      const animate = () => {
-        const diff = targetAngle - currentAngle;
-
-        // Stop animation when we're close enough to target
-        if (Math.abs(diff) < 0.5) {
-          // Set final position exactly
-          const finalRadians = degreeToRadian(targetAngle);
-          this.attr(
-            "line/d",
-            `M ${centerX} ${centerY} L ${
-              centerX + r * 0.8 * Math.cos(finalRadians)
-            } ${centerY + r * 0.8 * Math.sin(finalRadians)}`
-          );
-          this.animationId = null;
-          return;
-        }
-
-        // Calculate step based on distance and speed
-        const step =
-          Math.sign(diff) * Math.min(Math.abs(diff) * 0.1, this.animationSpeed);
-        currentAngle += step;
-
-        // Update line position based on current angle
-        const radians = degreeToRadian(currentAngle);
-        this.attr(
-          "line/d",
-          `M ${centerX} ${centerY} L ${centerX + r * 0.8 * Math.cos(radians)} ${
-            centerY + r * 0.8 * Math.sin(radians)
-          }`
-        );
-
-        // Continue animation
-        this.animationId = requestAnimationFrame(animate);
-      };
-
-      this.animationId = requestAnimationFrame(animate);
+      const linePath = `M ${centerX} ${centerY} L ${needleEndX} ${needleEndY}`;
+      this.attr("line/d", linePath);
     }
 
-    // You may also want to update the setValue method to make sure it properly calls the animation:
+    // Cập nhật setValue để sử dụng animation mượt mà
     setValue(targetValue: number) {
       const value = this.get("value");
-      const currentValue = Math.max(
+      // Đảm bảo giá trị nằm trong phạm vi cho phép
+      const clampedValue = Math.max(
         value.min,
         Math.min(value.max, targetValue)
       );
-      this.set("targetValue", currentValue);
 
-      // Calculate target angle based on the current value
-      const valueRatio = (currentValue - value.min) / (value.max - value.min);
-      const angleArc: AngleArc = this.get("angleArc");
+      // Cập nhật giá trị đích
+      this.set("targetValue", clampedValue);
+
+      // Tính toán góc mục tiêu dựa trên giá trị hiện tại
+      const valueRatio = (clampedValue - value.min) / (value.max - value.min);
+      const angleArc = this.get("angleArc");
       const targetAngle =
         angleArc.start + valueRatio * (angleArc.end - angleArc.start);
 
-      // Stop any existing animation and start new one
+      // Dừng animation hiện tại và bắt đầu animation mới
       this.stopRotation();
       this.animateToAngle(targetAngle);
+    }
+
+    // Phương thức để tùy chỉnh animation
+    setAnimationOptions(options: Partial<AnimationOptions>): void {
+      this.animationOptions = {
+        ...this.animationOptions,
+        ...options,
+      };
     }
   }
 }
