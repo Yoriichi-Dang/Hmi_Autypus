@@ -63,10 +63,9 @@ export default class StencilService {
   ) {
     const namespace = {
       ...appShapes,
-      ...dashboardV1,
+      ...dashboardV1, // Keep original structure
       ...speedometer,
     };
-    console.log(namespace);
     this.stencil = new joint.ui.Stencil({
       paper: paperScroller,
       snaplines: snaplines,

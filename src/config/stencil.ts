@@ -1,5 +1,3 @@
-import { DashboardV1 } from "../components/dashboard-v1";
-
 export const stencilGroups = {
   basic: { index: 1, label: "Basic shapes", closed: true },
   speedometer: { index: 2, label: "Speedometer" },
@@ -783,6 +781,51 @@ export const stencilShapes = {
       type: "dashboardV1.Speedometer",
       size: { width: 100, height: 100 },
       name: "Speedometer",
+      attrs: {
+        body: {
+          fill: "#ffffff",
+          stroke: "#353535",
+          strokeWidth: 1,
+        },
+      },
+      targetAttributes: {
+        size: { width: 60, height: 40 },
+      },
+    },
+    {
+      type: "dashboardV1.Tachometer",
+      size: { width: 100, height: 100 },
+      name: "Speedometer",
+      attrs: {
+        body: {
+          fill: "#ffffff",
+          stroke: "#353535",
+          strokeWidth: 1,
+        },
+      },
+      targetAttributes: {
+        size: { width: 60, height: 40 },
+      },
+    },
+    {
+      type: "dashboardV1.FuelGauge",
+      size: { width: 100, height: 100 },
+      name: "",
+      attrs: {
+        body: {
+          fill: "#ffffff",
+          stroke: "#353535",
+          strokeWidth: 1,
+        },
+      },
+      targetAttributes: {
+        size: { width: 60, height: 40 },
+      },
+    },
+    {
+      type: "dashboardV1.CoolantTemperature",
+      size: { width: 100, height: 100 },
+      name: "",
       attrs: {
         body: {
           fill: "#ffffff",

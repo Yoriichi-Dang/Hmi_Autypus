@@ -1,6 +1,6 @@
 import * as joint from "@joint/plus";
 import { SocComponent } from "./soc-component";
-export namespace DashboardV1 {
+export namespace dashboardV1 {
   export class Speedometer extends SocComponent.ArcValue {
     defaults() {
       return joint.util.defaultsDeep(
@@ -33,11 +33,12 @@ export namespace DashboardV1 {
       super.initialize(this.attributes);
     }
   }
-  export class RpmGauge extends SocComponent.ArcValue {
+  //rpm
+  export class Tachometer extends SocComponent.ArcValue {
     defaults() {
       return joint.util.defaultsDeep(
         {
-          type: "dashboardV1.RpmGauge",
+          type: "dashboardV1.Tachometer",
           size: { width: 200, height: 200 },
           attrs: {
             root: { magnetSelector: "body" },
@@ -66,7 +67,7 @@ export namespace DashboardV1 {
     defaults() {
       return joint.util.defaultsDeep(
         {
-          type: "dashboardV1.RpmGauge",
+          type: "dashboardV1.FuelGauge",
           size: { width: 200, height: 200 },
           attrs: {
             root: { magnetSelector: "body" },

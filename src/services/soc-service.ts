@@ -4,7 +4,7 @@ import { GraphEvent, ElementEvent, LinkEvent, PaperEvent } from "../events";
 import { ContextToolbarService, SelectionService } from "../services";
 import * as appShapes from "../shapes/app-shapes";
 import * as joint from "@joint/plus";
-import { DashboardV1 } from "../components/dashboard-v1";
+import { dashboardV1 } from "../components/dashboard-v1";
 export default class SocService {
   graphElements: GraphElements;
   services: ServiceGroup;
@@ -46,10 +46,6 @@ export default class SocService {
     this.initKeyBoardShortcuts();
     this.initContextToolbar();
     this.startEvent();
-    // const fuelGauge = new SocComponent.FuelGauge();
-    // fuelGauge.addTo(this.graphElements.graph);
-    const fuelGauge = new DashboardV1.FuelGauge();
-    fuelGauge.addTo(this.graphElements.graph);
   }
 
   startEvent() {
@@ -88,13 +84,14 @@ export default class SocService {
     this.events.paperEvent.createBlankEvent();
   }
   initPaper() {
+    const namespace = {
+      ...joint.shapes,
+      ...dashboardV1,
+    };
     const graph = (this.graphElements.graph = new joint.dia.Graph(
       {},
       {
-        cellNamespace: {
-          ...joint.shapes,
-          ...DashboardV1,
-        },
+        cellNamespace: namespace,
       }
     ));
     this.graphElements.commandManager = new joint.dia.CommandManager({
@@ -140,10 +137,7 @@ export default class SocService {
           return joint.routers.rightAngle.call(this, vertices, opt, linkView);
         },
       },
-      cellViewNamespace: {
-        ...joint.shapes,
-        ...DashboardV1,
-      },
+      cellViewNamespace: namespace,
     }));
     this.graphElements.snaplines = new joint.ui.Snaplines({ paper: paper });
 
