@@ -72,7 +72,6 @@ export namespace SocComponent {
         2 * attributes.angleArc["middle"] - attributes.angleArc["start"];
       this.initSvg();
       this.on("change:size", this.onResize, this);
-      this.on("change:attrs", this.applyFilters, this);
       this.on(
         "change:value change:angleArc change:numberPart change:numberSubPart",
         this.initPartLabel,
@@ -121,11 +120,6 @@ export namespace SocComponent {
     onValueChange() {
       const targetValue = this.get("targetValue");
       this.setValue(targetValue);
-    }
-
-    applyFilters(): void {
-      const filter = this.attr("arc/filter");
-      console.log(filter);
     }
 
     onResize(

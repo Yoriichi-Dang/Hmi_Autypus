@@ -5,6 +5,7 @@ import { ContextToolbarService, SelectionService } from "../services";
 import * as appShapes from "../shapes/app-shapes";
 import * as joint from "@joint/plus";
 import { dashboardV1 } from "../components/dashboard-v1";
+import { SocketService } from "./socker-service";
 export default class SocService {
   graphElements: GraphElements;
   services: ServiceGroup;
@@ -13,6 +14,7 @@ export default class SocService {
   constructor(
     private readonly paperContainer: HTMLDivElement,
     {
+      socketService,
       stencilService,
       navigatorService,
       haloService,
@@ -21,6 +23,7 @@ export default class SocService {
     }: ServiceGroup
   ) {
     this.services = {
+      socketService,
       stencilService,
       navigatorService,
       haloService,
@@ -45,6 +48,7 @@ export default class SocService {
     this.initNavigator();
     this.initKeyBoardShortcuts();
     this.initContextToolbar();
+    this.initSocket();
     this.startEvent();
   }
 
@@ -82,6 +86,14 @@ export default class SocService {
       this.services.contextToolbarService
     );
     this.events.paperEvent.createBlankEvent();
+  }
+  initSocket() {
+    this.services.socketService = new SocketService(
+      this.graphElements.paper,
+      this.graphElements.graph
+    );
+    this.services.socketService.initializeAddListener();
+    this.services.socketService.initializeServerConnect();
   }
   initPaper() {
     const namespace = {

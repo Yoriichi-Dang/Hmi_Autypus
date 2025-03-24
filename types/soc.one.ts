@@ -9,6 +9,7 @@ import {
   ContextToolbarService,
   SelectionService,
 } from "../src/services";
+import { SocketService } from "../src/services/socker-service";
 type EventGroup = {
   linkEvent: LinkEvent;
   elementEvent: ElementEvent;
@@ -17,6 +18,7 @@ type EventGroup = {
 };
 
 type ServiceGroup = {
+  socketService?: SocketService;
   stencilService: StencilService;
   inspectorService: InspectorService;
   navigatorService: NavigatorService;
