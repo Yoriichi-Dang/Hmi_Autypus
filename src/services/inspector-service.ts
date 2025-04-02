@@ -9,8 +9,8 @@ type InspectorElements = {
   header: HTMLDivElement;
   content: HTMLElement;
 };
-export class InspectorService {
-  inspector: joint.ui.Inspector;
+export default class InspectorService {
+  private inspector: joint.ui.Inspector;
   private readonly header: HTMLDivElement;
   private readonly content: HTMLElement;
   private readonly container: HTMLElement;

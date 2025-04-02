@@ -25,7 +25,6 @@ export namespace app {
     ): void {
       super.initialize(attributes, options);
       this.on("change:size", (_, newSize) => {
-        console.log(this.get("r"));
         const r = Math.max(newSize.width, newSize.height);
         this.resize(r, r, { syncResize: true });
       });

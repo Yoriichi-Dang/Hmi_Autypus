@@ -1,7 +1,11 @@
 export const stencilGroups = {
   basic: { index: 1, label: "Basic shapes", closed: true },
   speedometer: { index: 2, label: "Speedometer" },
-  advanced: { index: 2, label: "Advanced shapes", closed: true },
+  dashboardV1: {
+    index: 4,
+    label: "Dashboard Component V1",
+  },
+  advanced: { index: 3, label: "Advanced shapes", closed: true },
 };
 const PRIMARY_SHAPE_COLOR = "#353535";
 const PRIMARY_SHAPE_FILL = "#ffffff";
@@ -767,6 +771,42 @@ export const stencilShapes = {
           strokeDasharray: "0",
         },
       },
+      targetAttributes: {
+        size: { width: 60, height: 40 },
+      },
+    },
+  ],
+  dashboardV1: [
+    {
+      type: "dashboardV1.Speedometer",
+      size: { width: 100, height: 100 },
+      name: "Speedometer",
+      targetAttributes: {
+        size: { width: 60, height: 40 },
+      },
+    },
+    {
+      type: "dashboardV1.Tachometer",
+      size: { width: 100, height: 100 },
+      name: "x1000",
+      targetAttributes: {
+        size: { width: 60, height: 40 },
+      },
+    },
+    {
+      type: "dashboardV1.FuelGauge",
+      size: { width: 100, height: 100 },
+      name: "",
+
+      targetAttributes: {
+        size: { width: 60, height: 40 },
+      },
+    },
+    {
+      type: "dashboardV1.CoolantTemperature",
+      size: { width: 100, height: 100 },
+      name: "",
+
       targetAttributes: {
         size: { width: 60, height: 40 },
       },
