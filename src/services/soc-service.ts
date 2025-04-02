@@ -1,11 +1,17 @@
 import { GraphElements, ServiceGroup, EventGroup } from "../../types/soc.one";
 import { defaultPaperSize } from "../constants/paper";
-import { GraphEvent, ElementEvent, LinkEvent, PaperEvent } from "../events";
+import {
+  GraphEvent,
+  ElementEvent,
+  LinkEvent,
+  PaperEvent,
+  SelectionEvent,
+} from "../events";
 import { ContextToolbarService, SelectionService } from "../services";
 import * as appShapes from "../shapes/app-shapes";
 import * as joint from "@joint/plus";
 import { dashboardV1 } from "../components/dashboard-v1";
-import { SocketService } from "./socker-service";
+import { SocketService } from "./socket-service";
 export default class SocService {
   graphElements: GraphElements;
   services: ServiceGroup;
@@ -77,6 +83,10 @@ export default class SocService {
         this.services.keyboardService.keyboard,
         this.graphElements.paperScroller
       ),
+      selectionEvent: new SelectionEvent(
+        this.graphElements.selection,
+        this.services.selectionService
+      ),
     };
     this.events.linkEvent.createEventLink();
     this.events.elementEvent.createElementEvent();
@@ -86,6 +96,8 @@ export default class SocService {
       this.services.contextToolbarService
     );
     this.events.paperEvent.createBlankEvent();
+    this.events.selectionEvent.createEvent();
+    
   }
   initSocket() {
     this.services.socketService = new SocketService(
@@ -200,10 +212,6 @@ export default class SocService {
       frames: new joint.ui.HTMLSelectionFrameList({
         rotate: true,
       }),
-    });
-
-    this.graphElements.selection.collection.on("reset add remove", () => {
-      this.services.selectionService.onSelectionChange();
     });
 
     this.services.selectionService = new SelectionService(

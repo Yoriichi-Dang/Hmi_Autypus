@@ -6,7 +6,7 @@ interface ComponentHandler {
   handleData(element: joint.dia.Cell, data: any): void;
   disconnectHandler(element: joint.dia.Cell): void;
 }
-
+//stragy pattern
 // Component handler registry
 class ComponentHandlerRegistry {
   private handlers: Record<string, ComponentHandler> = {};
@@ -133,7 +133,7 @@ export class SocketService {
         if (attrs.label.text.toLowerCase() === "server") {
           this.connectionServer = new ConnectionServer();
           this.connectionServer
-            .connect("ws://localhost:8080/ws")
+            .connect("ws://localhost:2003/ws")
             .then(() => {
               this.updateElementStyle(cell, "green", 2);
               console.log("Connect success to server");
@@ -214,7 +214,6 @@ export class SocketService {
     targetName: string
   ): void {
     const elementType = targetElement.get("type");
-    console.log(elementType);
     // Get the appropriate handler or use default
     const handler =
       this.handlerRegistry.getHandler(elementType) ||

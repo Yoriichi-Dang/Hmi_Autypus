@@ -1,5 +1,11 @@
 import * as joint from "@joint/plus";
-import { LinkEvent, ElementEvent, GraphEvent, PaperEvent } from "../src/events";
+import {
+  LinkEvent,
+  ElementEvent,
+  GraphEvent,
+  PaperEvent,
+  SelectionEvent,
+} from "../src/events";
 import {
   StencilService,
   InspectorService,
@@ -9,12 +15,13 @@ import {
   ContextToolbarService,
   SelectionService,
 } from "../src/services";
-import { SocketService } from "../src/services/socker-service";
+import { SocketService } from "../src/services/socket-service";
 type EventGroup = {
   linkEvent: LinkEvent;
   elementEvent: ElementEvent;
   graphEvent: GraphEvent;
   paperEvent: PaperEvent;
+  selectionEvent: SelectionEvent;
 };
 
 type ServiceGroup = {
